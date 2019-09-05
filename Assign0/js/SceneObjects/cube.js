@@ -8,8 +8,8 @@ function CubeObject(scene) {
 
     this.update = function(time) {
         console.log(time);
-        cube.position.x = time;
-        cube.position.y = time;
+        cube.position.x = time % 18;
+        cube.position.y = time % 18;
         cube.rotation.y = (18 * time) * (Math.PI / 180);
     }
 }
