@@ -10,6 +10,6 @@ function CubeObject(scene) {
         console.log(time);
         cube.position.x = time;
         cube.position.y = time;
-        cube.rotation.y = 2 * time;
+        cube.rotation.y = (18 * time) * (Math.PI / 180);
     }
 }
