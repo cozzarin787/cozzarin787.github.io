@@ -1,6 +1,14 @@
 function CubeObject(scene) {
     var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({color: 0xff0000});
+    var cubeMaterials = [
+        new THREE.MeshBasicMaterial({color:0xff0000}),
+        new THREE.MeshBasicMaterial({color:0x00ff00}),
+        new THREE.MeshBasicMaterial({color:0x0000ff}),
+        new THREE.MeshBasicMaterial({color:0xffff00}),
+        new THREE.MeshBasicMaterial({color:0xff00ff}),
+        new THREE.MeshBasicMaterial({color:0x00ffff})
+    ];
+    var material = new THREE.MeshFaceMaterial(cubeMaterials);
     var cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
@@ -8,8 +16,8 @@ function CubeObject(scene) {
 
     this.update = function(time) {
         console.log(time);
-        cube.position.x = time % 18;
-        cube.position.y = time % 18;
+        cube.position.x = time % 20;
+        cube.position.y = time % 20;
         cube.rotation.y = (18 * time) * (Math.PI / 180);
     }
 }
