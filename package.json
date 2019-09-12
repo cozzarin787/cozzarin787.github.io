@@ -25,7 +25,9 @@
     "eslint-plugin-standard": "^4.0.1"
   },
   "dependencies": {
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "three": "^0.108.0",
+    "threejs-full-es6": "^5.1.0"
   },
   "keywords": []
 }

@@ -1,3 +1,5 @@
+import * as THREE from "../../node_modules/three/build/three.module.js";
+
 export default class CubeObject {
     constructor(scene) {
         var geometry = new THREE.BoxGeometry(1, 1, 1);

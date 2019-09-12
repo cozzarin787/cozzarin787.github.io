@@ -13,7 +13,6 @@
       "js/build",
       "js/build-min",
       "js/vendor",
-      "node_modules",
-      "typings"
+      "node_modules"
     ]
 }
