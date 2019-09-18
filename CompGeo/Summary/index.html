@@ -5,6 +5,272 @@
     <title>Computational Geometry Project Page</title>
 </head>
 <body>
-    <h1>Nothing here yet.</h1>
+    <h1>KD-Tree Pedagogical Aid</h1>
+    <h2>Team Members:</h2>
+    <p style="text-indent: 50px;">Jacob Cozzarin</p>
+
+    <h2>Problem Description:</h2>
+    <p style="text-indent: 50px;">Develop a pedagogical aid using three.js to showcase the building and maintaining of a kd-tree on a dynamic scene. The scene will be interactable and allow the user to place and move objects, showing the divisions in the scene created by the kd-tree algorithm.</p>
+    
+    <h2>Background information:</h2>
+    <p style="text-indent: 50px;"></p>
+
+    <h2>Pseudo-code:</h2>
+    <h3>Build Kd-tree:</h3>
+    <ul>
+        <li>Node getNode (List of primitives L, Voxel V):</li>
+        <ul>
+            <li>if (Terminal (L, V)) return new leaf node (L)</li>
+            <li>Find partition plane P</li>
+            <li>Split V with P producing V_front and V_rear</li>
+            <li>Partition elements of L producing L_front and L_rear</li>
+            <li>return new interior node (P, getNode(L_front, v_front), getNode (L_front, v_front))</li>
+        </ul>
+        <li>First call to getNode with the full list of primitives and world voxel will return the fully built kd-tree</li>
+    </ul>
+    <h3>Add to Kd-tree:</h3>
+    <ul>
+        <li>insert(primitive p, Node kd-tree):</li>
+        <ul>
+            <li>search for leaf node in kd-tree that will hold p</li>
+            <li>if (leaf node has space): insert p into primitive list L of node</li>
+            <li>else</li>
+            <ul>
+                <li>choose a partition plane P</li>
+                <li>Split voxel V in node with P producing V_front and V_rear</li>
+                <li>Partition elements of L producing L_front and L_rear</li>
+                <li>replace leaf node with internal node</li>
+                <li>internal front = L_front, internal rear = L_rear</li>
+            </ul>
+        </ul>
+        <li>I will be animating and displaying the partitioning planes as objects are moved and added to the scene.</li>
+    </ul>
+
+    <h2>Interesting Choices (Algorithm):</h2>
+    <ul>
+        <li>I plan on implementing the plane partitioning using a surface area heuristic algorithm to find optimal splits to balance the kd-tree. The surface area heuristic can also guide when to terminate a branch of a tree when the cost of spliting further is too high.</li>
+    </ul>
+
+    <h2>Timeline:</h2>
+    <table border="1" width="100%" cellspacing="2" cellpadding="2" height="494">
+      <tbody>
+        <tr align="center">
+          <td valign="middle" align="center">Week<br>
+          </td>
+          <td valign="middle" align="center">Days<br>
+          </td>
+          <td valign="middle" align="center">Topics<br>
+          </td>
+          <td valign="top">Assigned Readings<br>
+          </td>
+          <td valign="middle" align="center">Special Events<br>
+          </td>
+        </tr>
+          <td valign="middle" align="center">4<br>
+          </td>
+          <td valign="middle" align="center">Tue. Sept. 17<br>
+            Thu. Sept. 19<br>
+          </td>
+          <td valign="middle" align="center">Plane Sweep Algorithms<br>
+          </td>
+          <td valign="middle" align="center">Sections<br>
+            2.1 </td>
+          <td valign="middle" align="center">project summary on website
+            due </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" bgcolor="#cccccc" align="center">5<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Tue.
+            Sept. 24<br>
+            Thu. Sept. 26<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Line
+            Segment Intersection<br>
+            Polygon Triangulation<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Sections<br>
+            3.1, 3.2, 3.3 </td>
+          <td valign="middle" bgcolor="#cccccc" align="center"><br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" align="center">6<br>
+          </td>
+          <td valign="middle" align="center">Tue. Oct. 1<br>
+            Thu. Oct. 3<br>
+          </td>
+          <td valign="middle" align="center">Linear Programming<br>
+            Halfplane Intersection<br>
+          </td>
+          <td valign="middle" align="center">Sections<br>
+            4.2, 4.3, 4.4<br>
+          </td>
+          <td valign="middle" align="center">In-class project overview<br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" bgcolor="#cccccc" align="center">7<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Tue. Oct.
+            8<br>
+            Thu. Oct. 10<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Point-Line Duality<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Sections<br>
+            8.2</td>
+          <td valign="middle" bgcolor="#cccccc" align="center"><br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" align="center">8<br>
+          </td>
+          <td valign="middle" align="center">Thu. Oct. 17<br>
+          </td>
+          <td valign="middle" align="center">Trapezoidal maps<br>
+            Point Location</td>
+          <td valign="middle" align="center">Sections<br>
+            6.1, 6.2 </td>
+          <td valign="middle" align="center">Midterm Exam<br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" bgcolor="#cccccc" align="center">9<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Tue. Oct.
+            22<br>
+            Thu. Oct. 24<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Voronoi
+            Diagrams </td>
+          <td valign="top" bgcolor="#cccccc">Sections<br>
+            7 </td>
+          <td valign="middle" bgcolor="#cccccc" align="center"><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" bgcolor="#ffffff" align="center">10<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center">Tue. Oct.
+            29<br>
+            Thu. Oct. 31<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center">Delaunay
+            Triangulations </td>
+          <td valign="middle" bgcolor="#ffffff">
+            <div align="center"><br>
+            </div>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center">In-class
+            project presentation (5 minutes for each team)<br>
+            <a href="protected/Project/FeedbackForm.pdf">Some things
+              that will be considered during grading</a><br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center">
+            <meta charset="utf-8">
+            <br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" bgcolor="#cccccc" align="center">11<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Tue. Nov.
+            5<br>
+            Thu. Nov. 7<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Line
+            Arrangements<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc">
+            <div align="center">Sections<br>
+            </div>
+            <div align="center"> 9<br>
+            </div>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center"><br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" bgcolor="#ffffff" align="center">12<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center">Tue. Nov.
+            12<br>
+            Thu. Nov. 14<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center">
+            <meta charset="utf-8">
+            Zone Theorem<br>
+            Orthogonal Range Searching<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff">Section<br>
+            8.3, 5<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center"><br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" bgcolor="#cccccc" align="center">13<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Tue. Nov.
+            19<br>
+            Thu. Nov. 21<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">kd-Trees<br>
+            Orthogonal Range Trees<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc">Sections<br>
+            5.3, 5.3, 5.4<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center"><br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" bgcolor="#ffffff" align="center">14<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center">Tue. Nov.
+            26<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center">Fractional Cascading<br>
+            Well Separated Pair Decomposition </td>
+          <td valign="top" bgcolor="#ffffff">Sections<br>
+            5.6<br>
+          </td>
+          <td valign="middle" bgcolor="#ffffff" align="center"><a href="protected/Project/FeedbackForm.pdf"><br>
+            </a> </td>
+        </tr>
+        <tr align="center">
+          <td valign="middle" bgcolor="#cccccc" align="center">15<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">Tue. Dec.
+            3<br>
+            Thu. Dec. 5<br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center"><br>
+          </td>
+          <td valign="top" bgcolor="#cccccc"><br>
+          </td>
+          <td valign="middle" bgcolor="#cccccc" align="center">In-class
+            final project presentation (10-12 minutes for each team)<br>
+            Presentation schedule<br>
+            <a href="protected/Project/FeedbackForm.pdf">Some things
+              that will be considered during grading</a><br>
+            <br>
+            Final project webpage due - Dec. 9th, 11:59pm<br>
+          </td>
+        </tr>
+        <tr>
+        </tr>
+        <tr>
+          <td colspan="5" valign="middle" bgcolor="#ffffff" align="center">Finals Exams (December 11th - 18th)<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h2>References:</h2>
+    <ul>
+        <li>Professor Joe Geigel's Global Illumination slides</li>
+        <li></li>
+    </ul>
 </body>
 </html>
