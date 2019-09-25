@@ -16,7 +16,6 @@ export default class CubeObject {
         scene.add(cube);
         cube.position.set(0, 0, -20);
         this.update = function (time) {
-            console.log(time);
             cube.position.x = time % 20;
             cube.position.y = time % 20;
             cube.rotation.y = (18 * time) * (Math.PI / 180);
