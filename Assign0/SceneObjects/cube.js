@@ -11,8 +11,7 @@ export default class CubeObject {
             new THREE.MeshBasicMaterial({ color: 0xff00ff }),
             new THREE.MeshBasicMaterial({ color: 0x00ffff })
         ];
-        var material = new THREE.MeshFaceMaterial(cubeMaterials);
-        var cube = new THREE.Mesh(geometry, material);
+        var cube = new THREE.Mesh(geometry, cubeMaterials);
         scene.add(cube);
         cube.position.set(0, 0, -20);
         this.update = function (time) {
