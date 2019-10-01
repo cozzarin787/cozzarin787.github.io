@@ -25,7 +25,10 @@
     "eslint-plugin-standard": "^4.0.1"
   },
   "dependencies": {
+    "fs": "0.0.1-security",
+    "fs-extra": "^8.1.0",
     "request": "^2.88.0",
+    "start": "^5.1.0",
     "three": "^0.108.0",
     "threejs-full-es6": "^5.1.0"
   },
