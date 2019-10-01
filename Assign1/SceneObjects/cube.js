@@ -41,7 +41,7 @@ export default class CubeObject {
             // Construct Transformation Matrix
             // Set the rotation matrix of the transformation matrix of the object
             // Set the position vector of the transformation matrix of the object
-            cube.matrix.compose(newPosition, q1, new THREE.Vector3(2, 2, 2));
+            cube.matrix.compose(newPosition, q1, new THREE.Vector3(4, 4, 4));
             console.log(cube.matrix);
         };
     }
