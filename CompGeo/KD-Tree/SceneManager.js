@@ -1,5 +1,6 @@
 import * as THREE from "./three/build/three.module.js";
 import CubeObject from "./SceneObjects/cube.js";
+import PlaneObject from "./SceneObjects/plane.js";
 
 export default class SceneManager {
     constructor(canvas) {
@@ -11,10 +12,11 @@ export default class SceneManager {
         const scene = buildScene();
         const renderer = buildRender(screenDimensions);
         const camera = buildCamera(screenDimensions);
-        camera.position.set(11, -10, -35);
+        camera.position.set(0, 1, 10);
         camera.up = new THREE.Vector3(0, 1, 0);
         camera.lookAt(new THREE.Vector3(11, 0, 0));
-        const sceneObjects = createSceneObjects(scene);
+        const sceneFloorObject = new PlaneObject(scene);
+        var sceneObjects = [];
         
         function buildScene() {
             const scene = new THREE.Scene();
@@ -37,12 +39,6 @@ export default class SceneManager {
             const farPlane = 1000;
             const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
             return camera;
-        }
-        function createSceneObjects(scene) {
-            const sceneObjects = [
-                new CubeObject(scene)
-            ];
-            return sceneObjects;
         }
         this.update = function () {
             for (let i = 0; i < sceneObjects.length; i++)
