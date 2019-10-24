@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<title>Assignment 1</title> 		
+		<link rel="stylesheet" href="../css/style.css"> 
+	</head>
+
+	<body>
+		<a href="https://cozzarin787.github.io" style="position: absolute; top:0; left:0; z-index:1; color:cyan">Back</a>
+		<div class="UI">
+			<ul style="align-content: center;"></ul>
+				<div class="SlowInput" style="align-content: center;">
+					<div class="ImpulseForce" id="F_i">
+						<label style="padding-right: 10px;">Impulse Force</label>
+						<input id="impulseForce" type="range" min="0" max="100" value="50">
+					</div>
+					<div class="SlideFriction" id="u_s">
+						<label>Sliding Friction</label>
+						<input id="SlidingFriction" type="range" min="0" max="100" value="50">
+					</div>
+					<div class="RollFriction" id="u_r" style="padding-bottom: 5px;">
+						<label>Rolling Friction</label>
+						<input id="RollingFriction" type="range" min="0" max="100" value="50">
+					</div>
+					<div class="Restitution" id="e" style="padding-bottom: 5px;">
+						<label>CoE Restitution</label>
+						<input id="CoERestitution" type="range" min="0" max="100" value="50">
+					</div>
+					<div class="Start Simulation">
+						<button style="padding-top: 5px; padding-bottom: 5px; padding-left: 30px; padding-right: 30px;">Play</button>
+					</div>
+				</div>
+			</ul>
+		</div>
+		<canvas id="canvas"></canvas>
+		<script src="main.js" type="module"></script>
+	</body>
+</html>
