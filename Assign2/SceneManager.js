@@ -90,12 +90,12 @@ export default class SceneManager {
         function createBillards(scene) {
             const sceneObjects = [
                 new Billard(scene, 0xffffff, 0, 0.5, -6),
-                new Billard(scene, 0xffff00, 0, 0.5, 6),
-                new Billard(scene, 0x9f00ff, -0.5, 0.5, 6.95),
-                new Billard(scene, 0xff0000, 0.5, 0.5, 6.95)
+                new Billard(scene, 0xffff00, 0, 0.5, 5.9),
+                new Billard(scene, 0x9f00ff, -0.51, 0.5, 6.95),
+                new Billard(scene, 0xff0000, 0.51, 0.5, 6.95)
             ];
             // Give impulse force to cue ball
-            sceneObjects[0].calcInitialForce(2500, 0, 2500);
+            sceneObjects[0].calcInitialForce(25, 0, 25);
             return sceneObjects;
         }
         this.update = function () {
@@ -107,7 +107,6 @@ export default class SceneManager {
                 sceneObjects[i].update(elapsedTime, timeChange);
 
             // Collision detection / response
-            // Calc velocity for next step
             var e = parseFloat(document.getElementById("CoERestitution").value) / 100;
             for (let i = 0; i < sceneObjects.length; i++) {
                 // Detect Ball-to-Ball Collision
@@ -118,24 +117,11 @@ export default class SceneManager {
                         if (d_T <= sceneObjects[i].r + sceneObjects[j].r) {
                             console.log("BALL")
                             // Collision Detected
-                            // Back up collision to exact point
-                            var t_prime = (oldTime + elapsedTime) / 2;
-                            var left = oldTime;
-                            var right = elapsedTime;
-                            while (d_T > sceneObjects[i].r + sceneObjects[j] + 0.01 || d <= sceneObjects[i].r + sceneObjects[j]) {
-                                console.log("FUCKED")
-                                sceneObjects[i].update(t_prime, t_prime - oldTime);
-                                var d_T = sceneObjects[j].sphere.position.distanceTo(sceneObjects[i].sphere.position);
-                                if (d_T <= sceneObjects[i].r + sceneObjects[j].r) {
-                                    t_prime = (left + t_prime) / 2.0;
-                                }
-                                else if (d_T > sceneObjects[i].r + sceneObjects[j].r) {
-                                    t_prime = (t_prime + right) / 2.0;
-                                }
-                                else {
-                                    break;
-                                }
-                            }
+                            // Back up collision
+                            var v = new THREE.Vector3(sceneObjects[i].v.x, sceneObjects[i].v.y, sceneObjects[i].v.z);
+                            v.normalize();
+                            v.multiplyScalar(-1);
+                            sceneObjects[i].sphere.position.add(v.multiplyScalar(2*sceneObjects[i].r - d_T + 0.1));
                             // calculate line of action n
                             var n = new THREE.Vector3();
                             n.subVectors(sceneObjects[j].sphere.position, sceneObjects[i].sphere.position);
@@ -143,6 +129,10 @@ export default class SceneManager {
                             // Calc impulse                            
                             impulse.set(n.x, n.y, n.z);
                             impulse.multiplyScalar((sceneObjects[i].m * (sceneObjects[j].v.dot(n) - sceneObjects[i].v.dot(n))) / 2.0);
+
+                            // Update velocity for next step
+                            console.log("IMPULSE: ", impulse)
+                            sceneObjects[j].updateVelocity(-1 * impulse);
                         }
                     }
                 }
@@ -152,26 +142,9 @@ export default class SceneManager {
                     var d = result.subVectors(sceneObjects[i].sphere.position, poolSideNorms[k-1][1]).dot(poolSideNorms[k-1][0]);
                     if (d <= sceneObjects[i].r) {
                         // Collision Detected
-                        // Back up collision to exact point
-                        var t_prime = (oldTime + elapsedTime) / 2.0;
-                        var left = oldTime;
-                        var right = elapsedTime;
-                        while (d > sceneObjects[i].r + 0.01 || d <= sceneObjects[i].r) {
-                            console.log("FUCKED AGAIN")
-                            sceneObjects[i].update(t_prime, t_prime - oldTime);
-                            d = result.subVectors(sceneObjects[i].sphere.position, poolSideNorms[k-1][1]).dot(poolSideNorms[k-1][0]);
-                            if (d < sceneObjects[i].r) {
-                                right = t_prime;
-                                t_prime = (left + t_prime) / 2.0;
-                            }
-                            else if (d > sceneObjects[i].r) {
-                                left = t_prime;
-                                t_prime = (t_prime + right) / 2.0;
-                            }
-                            else {
-                                break;
-                            }
-                        }
+                        // Back up collision
+                        var v = new THREE.Vector3(poolSideNorms[k-1][0].x, poolSideNorms[k-1][0].y, poolSideNorms[k-1][0].z);
+                        sceneObjects[i].sphere.position.add(v.multiplyScalar(sceneObjects[i].r - d));
 
                         // reflect over the normal with some loss of energy due to e
                         var eVec = new THREE.Vector3(poolSideNorms[k-1][0].x, poolSideNorms[k-1][0].y, poolSideNorms[k-1][0].z);
@@ -179,8 +152,9 @@ export default class SceneManager {
                         sceneObjects[i].M.multiplyScalar(e);
                     }
                 }
-                // Update velocity
+                // Update velocity for next step
                 sceneObjects[i].updateVelocity(impulse);
+                console.log("Scene object: ", i, sceneObjects[i].M);
             }
             // Render Frame
             controls.update();

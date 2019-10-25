@@ -43,14 +43,15 @@ export default class Billard {
             // Find new rotation
             
             // Update Translational Momentum
-            this.M.addVectors(this.M, this.integrate(this.F.x, this.F.y, this.F.z, delta_t));
+            var v = new THREE.Vector3(this.v.x, this.v.y, this.v.z);
+            this.M.addVectors(v.multiplyScalar(this.m), this.integrate(this.F.x, this.F.y, this.F.z, delta_t));
             // Update Rotational Momentum
 
         };
 
         // Give initial force 
         this.calcInitialForce = function (x, y, z) {
-            this.M = new THREE.Vector3(x, y, z);
+            this.v = new THREE.Vector3(x, y, z);
         }
 
         this.integrate = function(x, y, z, delta_t) {
