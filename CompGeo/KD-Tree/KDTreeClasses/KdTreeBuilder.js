@@ -1,5 +1,5 @@
-import KdInterior from "./KdInterior.js.js"
-import KdLeaf from "./KdLeaf.js.js"
+import KdInterior from "./KdInterior.js"
+import KdLeaf from "./KdLeaf.js"
 import * as THREE from "../three/build/three.module.js"
 
 export default class KdTreeBuilder {

@@ -3,7 +3,7 @@ import { OrbitControls } from "./three/examples/jsm/controls/OrbitControls.js";
 import CubeObject from "./SceneObjects/cube.js";
 import SphereObject from "./SceneObjects/sphere.js"
 import PlaneObject from "./SceneObjects/plane.js";
-import KDTreeBuilder from "./KDTreeClasses/KdTreeBuilder.js.js"
+import KDTreeBuilder from "./KDTreeClasses/KdTreeBuilder.js"
 
 // Credit to: https://medium.com/@bluemagnificent/intro-to-javascript-3d-physics-using-ammo-js-and-three-js-dd48df81f591
 // Followed this tutorial to create the basic physics engine
