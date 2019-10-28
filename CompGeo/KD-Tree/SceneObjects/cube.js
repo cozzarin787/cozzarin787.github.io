@@ -15,7 +15,7 @@ export default class SphereObject {
     
         cube.castShadow = true;
         cube.receiveShadow = true;
-    
+        cube.geometry.computeBoundingBox();
         scene.add(cube);
 
         //Ammojs Section

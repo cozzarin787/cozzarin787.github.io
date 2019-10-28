@@ -3,6 +3,7 @@ import { OrbitControls } from "./three/examples/jsm/controls/OrbitControls.js";
 import CubeObject from "./SceneObjects/cube.js";
 import SphereObject from "./SceneObjects/sphere.js"
 import PlaneObject from "./SceneObjects/plane.js";
+import KDTreeBuilder from "./KDTreeClasses/KdTreeBuilder.js.js"
 
 // Credit to: https://medium.com/@bluemagnificent/intro-to-javascript-3d-physics-using-ammo-js-and-three-js-dd48df81f591
 // Followed this tutorial to create the basic physics engine
@@ -30,8 +31,14 @@ export default class SceneManager {
         const sceneFloor = new PlaneObject(scene, physicsWorld);
         const rigidBodies = [];
         const sceneObjects = [];
-        addSphereToScene([camera.position.x,20,camera.position.z - 70], scene, physicsWorld, rigidBodies);
+        addSphereToScene([2,20,2]);
         setupKeyControls();
+
+        // KD-Tree Initialization
+        const worldVoxel = new THREE.Box3(new THREE.Vector3(-100,0,-100), new THREE.Vector3(100,50,100))
+        const treeBuilder = new KDTreeBuilder();
+        var KD_TREE = treeBuilder.getNode(worldVoxel, rigidBodies, 0, scene);
+        var stopKdTreeUpdate = true;
         
         function buildScene() {
             const scene = new THREE.Scene();
@@ -116,13 +123,10 @@ export default class SceneManager {
             }
         
         }
-        function updateKdTree() {
-
-        }
-        function addSphereToScene(position, scene, physicsWorld, rigidBodies) {
+        function addSphereToScene(position) {
             sceneObjects.push(new SphereObject(position, scene, physicsWorld, rigidBodies));
         }
-        function addCubeToScene(position, scene, physicsWorld, rigidBodies) {
+        function addCubeToScene(position) {
             sceneObjects.push(new CubeObject(position, scene, physicsWorld, rigidBodies));
         }
         function setupKeyControls() {
@@ -132,24 +136,31 @@ export default class SceneManager {
                 vector.multiplyScalar(70);
                 vector.addVectors(vector, camera.position);
                 var position = [vector.x,vector.y+20,vector.z]
-                console.log(position)
                 switch (e.keyCode) {
                     // Add Sphere
                     case 83:
-                        addSphereToScene(position, scene, physicsWorld, rigidBodies);
+                        addSphereToScene(position);
                         break;
                     case 67:
-                        addCubeToScene(position, scene, physicsWorld, rigidBodies);
+                        addCubeToScene(position);
+                        break;
+                    case 85:
+                        stopKdTreeUpdate = !stopKdTreeUpdate;
                         break;
                 }
             };
         }
+        function updateKdTree() {
+            treeBuilder.destroy(KD_TREE, scene);
+            KD_TREE = treeBuilder.getNode(worldVoxel, rigidBodies, 0, scene);
+        }
         this.update = function () {
-            //console.log(camera.position)
             var deltaTime = clock.getDelta();
             controls.update();
             updatePhysics( deltaTime );
-            updateKdTree();
+            if (!stopKdTreeUpdate) {
+                updateKdTree();
+            }
             renderer.render(scene, camera);
         };
         this.onWindowResize = function () {

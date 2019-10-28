@@ -14,7 +14,7 @@ export default class SphereObject {
 
         ball.castShadow = true;
         ball.receiveShadow = true;
-
+        ball.geometry.computeBoundingBox();
         scene.add(ball);
 
 
