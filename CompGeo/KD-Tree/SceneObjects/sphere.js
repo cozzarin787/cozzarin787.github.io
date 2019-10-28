@@ -3,20 +3,20 @@ import * as THREE from "../three/build/three.module.js";
 export default class SphereObject {
     constructor(position, scene, physicsWorld, rigidBodies) {
         var pos = {x: position[0], y: position[1], z: position[2]};
-        var scale = {x: 4, y: 4, z: 4};
+        var radius = 2;
         var quat = {x: 0, y: 0, z: 0, w: 1};
         var mass = 1;
 
         //threeJS Section
-        var cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshPhongMaterial({color: 0xff0505}));
+        var ball = new THREE.Mesh(new THREE.SphereBufferGeometry(radius), new THREE.MeshPhongMaterial({color: 0xff0505}));
 
-        cube.position.set(pos.x, pos.y, pos.z);
-        cube.scale.set(scale.x, scale.y, scale.z);
-    
-        cube.castShadow = true;
-        cube.receiveShadow = true;
-    
-        scene.add(cube);
+        ball.position.set(pos.x, pos.y, pos.z);
+
+        ball.castShadow = true;
+        ball.receiveShadow = true;
+
+        scene.add(ball);
+
 
         //Ammojs Section
         var transform = new Ammo.btTransform();
@@ -25,7 +25,7 @@ export default class SphereObject {
         transform.setRotation( new Ammo.btQuaternion( quat.x, quat.y, quat.z, quat.w ) );
         var motionState = new Ammo.btDefaultMotionState( transform );
 
-        var colShape = new Ammo.btBoxShape( new Ammo.btVector3( scale.x * 0.5, scale.y * 0.5, scale.z * 0.5 ) );
+        var colShape = new Ammo.btSphereShape( radius );
         colShape.setMargin( 0.05 );
 
         var localInertia = new Ammo.btVector3( 0, 0, 0 );
@@ -34,10 +34,9 @@ export default class SphereObject {
         var rbInfo = new Ammo.btRigidBodyConstructionInfo( mass, motionState, colShape, localInertia );
         var body = new Ammo.btRigidBody( rbInfo );
 
-
         physicsWorld.addRigidBody( body );
 
-        cube.userData = body;
-        rigidBodies.push(cube);
+        ball.userData = body;
+        rigidBodies.push(ball);
     }
 }
