@@ -22,6 +22,9 @@ export default class Billard {
 
         // Update method used to animate the object based upon keyframes
         this.update = function (t, delta_t) {
+            console.log("Velocity: ", this.v);
+            console.log("Momentum: ", this.M);
+            console.log("Force: ", this.F);
             var u_s = parseFloat(document.getElementById("SlidingFriction").value) / 100;
             var u_r = parseFloat(document.getElementById("RollingFriction").value) / 100;
             
@@ -62,6 +65,7 @@ export default class Billard {
 
         this.updateVelocity = function(J) {
             // Update Translational Velocity
+            console.log("VALUE OF IMPULSE*************************** ", J);
             var newV = new THREE.Vector3(this.M.x, this.M.y, this.M.z);
             newV.divideScalar(this.m);
             this.v.addVectors(newV, J);

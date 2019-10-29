@@ -95,44 +95,53 @@ export default class SceneManager {
                 new Billard(scene, 0xff0000, 0.51, 0.5, 6.95)
             ];
             // Give impulse force to cue ball
-            sceneObjects[0].calcInitialForce(25, 0, 25);
+            sceneObjects[0].calcInitialForce(0, 0, 25);
             return sceneObjects;
         }
         this.update = function () {
             const elapsedTime = clock.getElapsedTime();
             const timeChange = clock.getElapsedTime() - oldTime;
             
-            for (let i = 0; i < sceneObjects.length; i++)
+            for (let i = 0; i < sceneObjects.length; i++) {
                 // Calc Forces, Update position / rotation, Update Momentum
+                console.log("BALL ", i);
                 sceneObjects[i].update(elapsedTime, timeChange);
+            }
 
             // Collision detection / response
             var e = parseFloat(document.getElementById("CoERestitution").value) / 100;
             for (let i = 0; i < sceneObjects.length; i++) {
                 // Detect Ball-to-Ball Collision
                 var impulse = new THREE.Vector3();
-                for (let j = 0; j < sceneObjects.length; j++) {
+                for (let j = i; j < sceneObjects.length; j++) {
                     if (i != j) {
-                        var d_T = sceneObjects[j].sphere.position.distanceTo(sceneObjects[i].sphere.position);
+                        var d_T = sceneObjects[i].sphere.position.distanceTo(sceneObjects[j].sphere.position);
                         if (d_T <= sceneObjects[i].r + sceneObjects[j].r) {
-                            console.log("BALL")
                             // Collision Detected
                             // Back up collision
                             var v = new THREE.Vector3(sceneObjects[i].v.x, sceneObjects[i].v.y, sceneObjects[i].v.z);
                             v.normalize();
                             v.multiplyScalar(-1);
-                            sceneObjects[i].sphere.position.add(v.multiplyScalar(2*sceneObjects[i].r - d_T + 0.1));
+
+                            sceneObjects[i].sphere.position.add(v.multiplyScalar(2*sceneObjects[i].r - d_T + 0.05));
+                            d_T = sceneObjects[i].sphere.position.distanceTo(sceneObjects[j].sphere.position);
+                            while (d_T <= sceneObjects[i].r + sceneObjects[j].r) {
+                                sceneObjects[i].sphere.position.add(v);
+                                d_T = sceneObjects[i].sphere.position.distanceTo(sceneObjects[j].sphere.position);
+                            }
                             // calculate line of action n
                             var n = new THREE.Vector3();
                             n.subVectors(sceneObjects[j].sphere.position, sceneObjects[i].sphere.position);
                             n.normalize();
-                            // Calc impulse                            
+                            // Calc impulse                         
                             impulse.set(n.x, n.y, n.z);
-                            impulse.multiplyScalar((sceneObjects[i].m * (sceneObjects[j].v.dot(n) - sceneObjects[i].v.dot(n))) / 2.0);
-
+                            impulse.multiplyScalar(((sceneObjects[j].v.dot(n) - sceneObjects[i].v.dot(n))));
                             // Update velocity for next step
                             console.log("IMPULSE: ", impulse)
-                            sceneObjects[j].updateVelocity(-1 * impulse);
+                            var oppositeImpulse = new THREE.Vector3();
+                            oppositeImpulse.set(impulse.x, impulse.y, impulse.z).multiplyScalar(-1);
+                            sceneObjects[j].updateVelocity(oppositeImpulse);
+                            sceneObjects[i].updateVelocity(impulse);
                         }
                     }
                 }
@@ -148,13 +157,10 @@ export default class SceneManager {
 
                         // reflect over the normal with some loss of energy due to e
                         var eVec = new THREE.Vector3(poolSideNorms[k-1][0].x, poolSideNorms[k-1][0].y, poolSideNorms[k-1][0].z);
-                        sceneObjects[i].M.subVectors(sceneObjects[i].M, eVec.multiplyScalar(2 * sceneObjects[i].M.dot(eVec)));
-                        sceneObjects[i].M.multiplyScalar(e);
+                        sceneObjects[i].v.subVectors(sceneObjects[i].v, eVec.multiplyScalar(2 * sceneObjects[i].v.dot(eVec)));
+                        sceneObjects[i].v.multiplyScalar(e);
                     }
                 }
-                // Update velocity for next step
-                sceneObjects[i].updateVelocity(impulse);
-                console.log("Scene object: ", i, sceneObjects[i].M);
             }
             // Render Frame
             controls.update();
