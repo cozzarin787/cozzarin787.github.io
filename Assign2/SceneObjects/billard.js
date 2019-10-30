@@ -13,7 +13,6 @@ export default class Billard {
         this.m = 170;
         this.r = 0.5;
         this.M = new THREE.Vector3();
-        this.F = new THREE.Vector3();
         this.a = new THREE.Vector3();
         this.v = new THREE.Vector3();
         this.torque = new THREE.Vector3();
@@ -22,21 +21,19 @@ export default class Billard {
 
         // Update method used to animate the object based upon keyframes
         this.update = function (t, delta_t) {
-            console.log("Velocity: ", this.v);
-            console.log("Momentum: ", this.M);
-            console.log("Force: ", this.F);
             var u_s = parseFloat(document.getElementById("SlidingFriction").value) / 100;
             var u_r = parseFloat(document.getElementById("RollingFriction").value) / 100;
             
             // Calculate Forces: F(t), torque(t)
             var calcFricSwitch = new THREE.Vector3(this.v.x, this.v.y, this.v.z);
             var time_of_nat_roll = calcFricSwitch.multiplyScalar(2.0/(7.0 * u_s * this.g));
-            var F_fric = 0;
+            var F_fric = new THREE.Vector3(this.v.x, this.v.y, this.v.z);
+            F_fric.normalize().multiplyScalar(-1);
             if (t >= time_of_nat_roll) {
-                F_fric = u_r*this.m*this.g;
+                F_fric.multiplyScalar(u_r*this.m*this.g);
             }
             else {
-                F_fric = u_s*this.m*this.g;
+                F_fric.multiplyScalar(u_s*this.m*this.g);
             }
             // Integrate position/rotation
             // Find new position
@@ -47,14 +44,14 @@ export default class Billard {
             
             // Update Translational Momentum
             var v = new THREE.Vector3(this.v.x, this.v.y, this.v.z);
-            this.M.addVectors(v.multiplyScalar(this.m), this.integrate(this.F.x, this.F.y, this.F.z, delta_t));
+            this.M.addVectors(v.multiplyScalar(this.m), this.integrate(F_fric.x, F_fric.y, F_fric.z, delta_t));
             // Update Rotational Momentum
 
         };
 
         // Give initial force 
         this.calcInitialForce = function (x, y, z) {
-            this.v = new THREE.Vector3(x, y, z);
+            this.v.set(x, y, z);
         }
 
         this.integrate = function(x, y, z, delta_t) {
@@ -65,7 +62,6 @@ export default class Billard {
 
         this.updateVelocity = function(J) {
             // Update Translational Velocity
-            console.log("VALUE OF IMPULSE*************************** ", J);
             var newV = new THREE.Vector3(this.M.x, this.M.y, this.M.z);
             newV.divideScalar(this.m);
             this.v.addVectors(newV, J);

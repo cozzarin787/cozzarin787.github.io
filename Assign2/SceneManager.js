@@ -92,59 +92,92 @@ export default class SceneManager {
                 new Billard(scene, 0xffffff, 0, 0.5, -6),
                 new Billard(scene, 0xffff00, 0, 0.5, 5.9),
                 new Billard(scene, 0x9f00ff, -0.51, 0.5, 6.95),
-                new Billard(scene, 0xff0000, 0.51, 0.5, 6.95)
+                new Billard(scene, 0xff0000, 0.51, 0.5, 6.95),
+                new Billard(scene, 0x3f00f0, -1.01, 0.5, 7.95),
+                new Billard(scene, 0x000000, 0, 0.5, 7.95),
+                new Billard(scene, 0x0000ff, 1.01, 0.5, 7.95),
+                new Billard(scene, 0xff3f00, -1.53, 0.5, 8.95),
+                new Billard(scene, 0x0f3f00, -0.50, 0.5, 8.95),
+                new Billard(scene, 0x000f3f, 0.51, 0.5, 8.95),
+                new Billard(scene, 0x0fffff, 1.53, 0.5, 8.95)
             ];
-            // Give impulse force to cue ball
-            sceneObjects[0].calcInitialForce(0, 0, 25);
             return sceneObjects;
         }
         this.update = function () {
             const elapsedTime = clock.getElapsedTime();
-            const timeChange = clock.getElapsedTime() - oldTime;
+            const timeChange = elapsedTime - oldTime;
+            oldTime = elapsedTime;
             
             for (let i = 0; i < sceneObjects.length; i++) {
                 // Calc Forces, Update position / rotation, Update Momentum
-                console.log("BALL ", i);
                 sceneObjects[i].update(elapsedTime, timeChange);
             }
 
             // Collision detection / response
             var e = parseFloat(document.getElementById("CoERestitution").value) / 100;
+            var impulses = [];
+            for (let i = 0; i < sceneObjects.length; i++)
+                impulses.push(new THREE.Vector3());
+
             for (let i = 0; i < sceneObjects.length; i++) {
                 // Detect Ball-to-Ball Collision
-                var impulse = new THREE.Vector3();
                 for (let j = i; j < sceneObjects.length; j++) {
                     if (i != j) {
                         var d_T = sceneObjects[i].sphere.position.distanceTo(sceneObjects[j].sphere.position);
                         if (d_T <= sceneObjects[i].r + sceneObjects[j].r) {
                             // Collision Detected
                             // Back up collision
-                            var v = new THREE.Vector3(sceneObjects[i].v.x, sceneObjects[i].v.y, sceneObjects[i].v.z);
-                            v.normalize();
-                            v.multiplyScalar(-1);
+                            // If current object is colliding, but isn't moving, backup the other object before the collision
+                            var v1 = new THREE.Vector3(sceneObjects[i].v.x, sceneObjects[i].v.y, sceneObjects[i].v.z);
+                            v1.normalize();
+                            v1.multiplyScalar(-1);
+                            var v2 = new THREE.Vector3(sceneObjects[j].v.x, sceneObjects[j].v.y, sceneObjects[j].v.z);
+                            v2.normalize();
+                            v2.multiplyScalar(-1);
+                            var pos1 = sceneObjects[i].sphere.position;
+                            var pos2 = sceneObjects[j].sphere.position;
 
-                            sceneObjects[i].sphere.position.add(v.multiplyScalar(2*sceneObjects[i].r - d_T + 0.05));
-                            d_T = sceneObjects[i].sphere.position.distanceTo(sceneObjects[j].sphere.position);
-                            while (d_T <= sceneObjects[i].r + sceneObjects[j].r) {
-                                sceneObjects[i].sphere.position.add(v);
-                                d_T = sceneObjects[i].sphere.position.distanceTo(sceneObjects[j].sphere.position);
+                            var prevPos1 = pos1;
+                            var prevPos2 = pos2;
+                            pos1.add(v1.multiplyScalar(2*sceneObjects[i].r - d_T + 0.05));
+                            d_T = pos1.distanceTo(pos2);
+
+                            if (d_T <= sceneObjects[i].r + sceneObjects[j].r) {
+                                pos1 = prevPos1;
+                                pos2.add(v2.multiplyScalar(2*sceneObjects[i].r - d_T + 0.05));
+                                d_T = pos1.distanceTo(pos2);
+                                var toggleCount = 0;
+                                pos2 = prevPos2;
+                                while (d_T <= sceneObjects[i].r + sceneObjects[j].r) {
+                                    if (toggleCount < 5) {
+                                        var incVec = new THREE.Vector3().set(v1.x, v1.y, v1.z).divideScalar(2)
+                                        pos1.add(incVec);
+                                        d_T = pos1.distanceTo(pos2);
+                                    } 
+                                    else {
+                                        pos1 = prevPos1;
+                                        var incVec = new THREE.Vector3().set(v1.x, v1.y, v1.z).divideScalar(2)
+                                        pos1.add(incVec);
+                                        d_T = pos1.distanceTo(pos2);
+                                    }
+                                }
                             }
+
                             // calculate line of action n
                             var n = new THREE.Vector3();
                             n.subVectors(sceneObjects[j].sphere.position, sceneObjects[i].sphere.position);
                             n.normalize();
                             // Calc impulse                         
-                            impulse.set(n.x, n.y, n.z);
-                            impulse.multiplyScalar(((sceneObjects[j].v.dot(n) - sceneObjects[i].v.dot(n))));
+                            impulses[i].set(n.x, n.y, n.z);
+                            impulses[i].multiplyScalar(((sceneObjects[j].v.dot(n) - sceneObjects[i].v.dot(n))));
                             // Update velocity for next step
-                            console.log("IMPULSE: ", impulse)
                             var oppositeImpulse = new THREE.Vector3();
-                            oppositeImpulse.set(impulse.x, impulse.y, impulse.z).multiplyScalar(-1);
-                            sceneObjects[j].updateVelocity(oppositeImpulse);
-                            sceneObjects[i].updateVelocity(impulse);
+                            oppositeImpulse.set(impulses[i].x, impulses[i].y, impulses[i].z).multiplyScalar(-1);
+                            impulses[j] = oppositeImpulse;
                         }
                     }
                 }
+                sceneObjects[i].updateVelocity(impulses[i]);
                 // Detect Ball-to-Cusion Collision
                 for (let k = 1; k < poolTable.length; k++) {
                     var result = new THREE.Vector3();
@@ -165,8 +198,12 @@ export default class SceneManager {
             // Render Frame
             controls.update();
             renderer.render(scene, camera);
-            oldTime = elapsedTime;
         };
+
+        document.getElementById("StartSim").onclick = function () {
+            sceneObjects[0].calcInitialForce(0,0,parseFloat(document.getElementById("impulseForce").value));
+        }
+
         this.onWindowResize = function () {
             const { width, height } = canvas;
             screenDimensions.width = width;
