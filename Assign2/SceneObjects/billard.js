@@ -26,10 +26,10 @@ export default class Billard {
             
             // Calculate Forces: F(t), torque(t)
             var calcFricSwitch = new THREE.Vector3(this.v.x, this.v.y, this.v.z);
-            var time_of_nat_roll = calcFricSwitch.multiplyScalar(2.0/(7.0 * u_s * this.g));
+            var time_of_nat_roll = calcFricSwitch.length() * (2.0/(7.0 * u_s * this.g));
             var F_fric = new THREE.Vector3(this.v.x, this.v.y, this.v.z);
             F_fric.normalize().multiplyScalar(-1);
-            if (t >= time_of_nat_roll) {
+            if (delta_t >= time_of_nat_roll) {
                 F_fric.multiplyScalar(u_r*this.m*this.g);
             }
             else {
