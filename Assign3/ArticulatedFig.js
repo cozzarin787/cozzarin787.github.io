@@ -20,22 +20,84 @@ export default class ArticulatedFig {
         this.figure = buildFigure(bvhData);
         this.numFrames = numFrames;
         this.frameTime = frameTime;
-        this.frames = frames;
+        console.log(numFrames)
+        console.log(frameTime)
 
         this.update = function(time, keyFrameIndex) {
             // Calculate U value to interpolate on
-            var u = ((time - keyFrameIndex * this.frameTime) / this.frameTime) % 2;
+            var u = ((time - (keyFrameIndex * this.frameTime)) / this.frameTime);
+            console.log(u)
             var transMat = new THREE.Matrix4();
-            inOrderMoCapApply(u, keyFrameIndex, transMat);
+            inOrderMoCapApply(u, this.figure, keyFrameIndex, transMat, 0);
         }
 
-        function inOrderMoCapApply(u, keyFrameIndex, transMat) {
-            // Calculate Interpolated value for 
+        function inOrderMoCapApply(u, currentNode, keyFrameIndex, transMat, mocapIndex) {
+            // Calculate Interpolated values between frames for each data point for the currentNode
+            var curTransMat = new THREE.Matrix4();
+            if (currentNode.channelMask.length == 6) {
+                // Interpolation based on u value
+                // Translation
+                var p0 = new THREE.Vector3(frames[keyFrameIndex][mocapIndex], frames[keyFrameIndex][mocapIndex+1], frames[keyFrameIndex][mocapIndex+2]);
+                var p1 = new THREE.Vector3(frames[keyFrameIndex + 1][mocapIndex], frames[keyFrameIndex + 1][mocapIndex+1], frames[keyFrameIndex + 1][mocapIndex+2]);
+                mocapIndex += 3;
+                var translate = new THREE.Vector3();
+                translate.subVectors(p1, p0);
+                translate.multiplyScalar(u);
+                translate.add(p0);
+                curTransMat.setPosition(translate);
+                curTransMat.multiply(transMat);
+            }
+            else {
+                curTransMat = transMat.clone();
+            }
+
+            // Translate joint
+            curTransMat.multiply(currentNode.offsetMat);
+            currentNode.sphere.matrix = curTransMat;
+            currentNode.updateLines();
+            // Orientation
+            var q1 = new THREE.Quaternion();
+            var q2 = new THREE.Quaternion();
+            var newTransMat = curTransMat.clone();
+            var rotatMatX = new THREE.Matrix4();
+            var rotatMatY = new THREE.Matrix4();
+            var rotatMatZ = new THREE.Matrix4();
+
+            var z_axis = new THREE.Vector3(0,0,1);
+            q1.setFromAxisAngle(z_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex+2]).normalize();
+            q2.setFromAxisAngle(z_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex+2]).normalize();
+            q1.slerp(q2, u);
+            q1.normalize();
+            rotatMatZ.makeRotationFromQuaternion(q1);
+
+            var x_axis = new THREE.Vector3(1,0,0);
+            q1.setFromAxisAngle(x_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex]).normalize();
+            q2.setFromAxisAngle(x_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex]).normalize();
+            q1.slerp(q2, u);
+            q1.normalize();
+            rotatMatX.makeRotationFromQuaternion(q1);
+
+            var y_axis = new THREE.Vector3(0,1,0);
+            q1.setFromAxisAngle(y_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex+1]).normalize();
+            q2.setFromAxisAngle(y_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex+1]).normalize();
+            q1.slerp(q2, u);
+            q1.normalize();
+            rotatMatY.makeRotationFromQuaternion(q1);
+            
+            newTransMat.multiply(rotatMatZ).multiply(rotatMatX).multiply(rotatMatY);
+            mocapIndex += 3;
+
+            // Update the children
+            if (currentNode.joints.length > 0) {
+                currentNode.joints.forEach(child => {
+                    inOrderMoCapApply(u, child, keyFrameIndex, newTransMat, mocapIndex);
+                });
+            }
         }
 
         function buildFigure(fileLines) {
             // Check beginning for hierarchy and root definitions
-            var line = fileLines.shift();
+            var line = fileLines.shift().trim();
             if (line != "HIERARCHY") {
                 console.log("Invalid file format. Exiting");
                 return -1;
@@ -161,16 +223,38 @@ export default class ArticulatedFig {
             }
             // Get number of frames
             var frameNum = fileLines.shift().split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } );
-            numFrames = frameNum[1];
+            numFrames = parseFloat(frameNum[1]);
             // Get frame time
             var timeFrame = fileLines.shift().split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } );
             
-            frameTime = timeFrame[2];
+            frameTime = parseFloat(timeFrame[2]);
             
             fileLines.forEach(element => {
                 frames.push(element.split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } ).map(parseFloat));
             });;
             return currentNode;
+        }
+
+        this.destroy = function(node) {
+            // Destroy sphere
+            scene.remove(node.sphere);
+            node.sphere.geometry.dispose();
+            node.sphere.material.dispose();
+            node.sphere = undefined;
+
+            // Destroy line
+            if (node.line) {
+                scene.remove(node.line);
+                node.line.geometry.dispose();
+                node.line.material.dispose();
+                node.line = undefined;
+            }
+
+            if (node.joints.length > 0) {
+                node.joints.forEach(child => {
+                    this.destroy(child);
+                });
+            }
         }
     }
 }

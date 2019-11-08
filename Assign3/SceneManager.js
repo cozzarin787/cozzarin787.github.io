@@ -14,8 +14,8 @@ export default class SceneManager {
         const scene = buildScene();
         const renderer = buildRender(screenDimensions);
         const camera = buildCamera(screenDimensions);
-        camera.position.set(0, 30, 70);
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        camera.position.set(-100, 150, 300);
+        camera.lookAt(new THREE.Vector3(0, 100, 0));
         const controls = new OrbitControls( camera, renderer.domElement );
         controls.enableKeys = true;
         addSceneLights(scene);
@@ -23,7 +23,7 @@ export default class SceneManager {
         var oldTime = 0;
 
         const sceneFloor = new PlaneObject(scene);
-        const articulatedFigure = new ArticulatedFig("./BVH_MOCAP/Example1.bvh", scene);
+        var articulatedFigure = new ArticulatedFig("./BVH_MOCAP/PIck up.bvh", scene);
         
         function buildScene() {
             const scene = new THREE.Scene();
@@ -43,7 +43,7 @@ export default class SceneManager {
             const aspectRatio = width / height;
             const fieldOfView = 60;
             const nearPlane = 1;
-            const farPlane = 1000;
+            const farPlane = 10000;
             const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
             return camera;
         }
@@ -78,17 +78,23 @@ export default class SceneManager {
         }
         this.update = function () {
             const elapsedTime = clock.getElapsedTime() - oldTime;
-            if (elapsedTime > (keyFrameIndex+1) * articulatedFigure.frameTime) {
+            while (elapsedTime > (keyFrameIndex+1) * articulatedFigure.frameTime) {
                 keyFrameIndex++;
                 if (keyFrameIndex == articulatedFigure.numFrames) {
                     keyFrameIndex = 0;
                     oldTime = clock.getElapsedTime();
+                    break;
                 }
             }
             articulatedFigure.update(elapsedTime, keyFrameIndex);
             controls.update();
             renderer.render(scene, camera);
         };
+        document.getElementById("BvhVal").addEventListener("change", function () {
+            articulatedFigure.destroy(articulatedFigure.figure);
+            articulatedFigure = new ArticulatedFig("./BVH_MOCAP/" + document.getElementById("BvhVal").value, scene);
+            
+        }, false);
         this.onWindowResize = function () {
             const { width, height } = canvas;
             screenDimensions.width = width;
