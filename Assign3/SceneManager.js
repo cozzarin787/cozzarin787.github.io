@@ -14,8 +14,8 @@ export default class SceneManager {
         const scene = buildScene();
         const renderer = buildRender(screenDimensions);
         const camera = buildCamera(screenDimensions);
-        camera.position.set(-100, 150, 300);
-        camera.lookAt(new THREE.Vector3(0, 100, 0));
+        camera.position.set(-100, 300, 300);
+        camera.lookAt(new THREE.Vector3(0, 300, 0));
         const controls = new OrbitControls( camera, renderer.domElement );
         controls.enableKeys = true;
         addSceneLights(scene);
@@ -23,7 +23,7 @@ export default class SceneManager {
         var oldTime = 0;
 
         const sceneFloor = new PlaneObject(scene);
-        var articulatedFigure = new ArticulatedFig("./BVH_MOCAP/PIck up.bvh", scene);
+        var articulatedFigure = new ArticulatedFig("./BVH_MOCAP/Ambient.bvh", scene);
         
         function buildScene() {
             const scene = new THREE.Scene();
