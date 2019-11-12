@@ -93,7 +93,8 @@ export default class SceneManager {
         document.getElementById("BvhVal").addEventListener("change", function () {
             articulatedFigure.destroy(articulatedFigure.figure);
             articulatedFigure = new ArticulatedFig("./BVH_MOCAP/" + document.getElementById("BvhVal").value, scene);
-            
+            keyFrameIndex = 0;
+            oldTime = clock.getElapsedTime();
         }, false);
         this.onWindowResize = function () {
             const { width, height } = canvas;

@@ -20,18 +20,18 @@ export default class ArticulatedFig {
         this.figure = buildFigure(bvhData);
         this.numFrames = numFrames;
         this.frameTime = frameTime;
-        console.log(numFrames)
-        console.log(frameTime)
+        var mocapIndex = 0;
 
         this.update = function(time, keyFrameIndex) {
             // Calculate U value to interpolate on
             var u = ((time - (keyFrameIndex * this.frameTime)) / this.frameTime);
-            console.log(u)
             var transMat = new THREE.Matrix4();
-            inOrderMoCapApply(u, this.figure, keyFrameIndex, transMat, 0);
+            // Reset mocapIndex at start of frame
+            mocapIndex = 0;
+            inOrderMoCapApply(u, this.figure, keyFrameIndex, transMat);
         }
 
-        function inOrderMoCapApply(u, currentNode, keyFrameIndex, transMat, mocapIndex) {
+        function inOrderMoCapApply(u, currentNode, keyFrameIndex, transMat) {
             // Calculate Interpolated values between frames for each data point for the currentNode
             var curTransMat = new THREE.Matrix4();
             if (currentNode.channelMask.length == 6) {
@@ -55,44 +55,43 @@ export default class ArticulatedFig {
             curTransMat.multiply(currentNode.offsetMat);
             currentNode.sphere.matrix = curTransMat;
             currentNode.updateLines();
-            // Orientation
-            var q1 = new THREE.Quaternion();
-            var q2 = new THREE.Quaternion();
-            var newTransMat = curTransMat.clone();
-            var rotatMatX = new THREE.Matrix4();
-            var rotatMatY = new THREE.Matrix4();
-            var rotatMatZ = new THREE.Matrix4();
+            if (currentNode.joints.length != 0) {
+                // Orientation
+                var q1 = new THREE.Quaternion();
+                var q2 = new THREE.Quaternion();
+                var newTransMat = curTransMat.clone();
+                var rotatMatX = new THREE.Matrix4();
+                var rotatMatY = new THREE.Matrix4();
+                var rotatMatZ = new THREE.Matrix4();
 
-            var z_axis = new THREE.Vector3(0,0,1);
-            q1.setFromAxisAngle(z_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex+2]).normalize();
-            q2.setFromAxisAngle(z_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex+2]).normalize();
-            q1.slerp(q2, u);
-            q1.normalize();
-            rotatMatZ.makeRotationFromQuaternion(q1);
+                var z_axis = new THREE.Vector3(0,0,1);
+                q1.setFromAxisAngle(z_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex]).normalize();
+                q2.setFromAxisAngle(z_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex]).normalize();
+                q1.slerp(q2, u);
+                q1.normalize();
+                rotatMatZ.makeRotationFromQuaternion(q1);
 
-            var x_axis = new THREE.Vector3(1,0,0);
-            q1.setFromAxisAngle(x_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex]).normalize();
-            q2.setFromAxisAngle(x_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex]).normalize();
-            q1.slerp(q2, u);
-            q1.normalize();
-            rotatMatX.makeRotationFromQuaternion(q1);
+                var x_axis = new THREE.Vector3(1,0,0);
+                q1.setFromAxisAngle(x_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex+1]).normalize();
+                q2.setFromAxisAngle(x_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex+1]).normalize();
+                q1.slerp(q2, u);
+                q1.normalize();
+                rotatMatX.makeRotationFromQuaternion(q1);
 
-            var y_axis = new THREE.Vector3(0,1,0);
-            q1.setFromAxisAngle(y_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex+1]).normalize();
-            q2.setFromAxisAngle(y_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex+1]).normalize();
-            q1.slerp(q2, u);
-            q1.normalize();
-            rotatMatY.makeRotationFromQuaternion(q1);
-            
-            newTransMat.multiply(rotatMatZ).multiply(rotatMatX).multiply(rotatMatY);
-            mocapIndex += 3;
-
-            // Update the children
-            if (currentNode.joints.length > 0) {
+                var y_axis = new THREE.Vector3(0,1,0);
+                q1.setFromAxisAngle(y_axis, (Math.PI/180) * frames[keyFrameIndex][mocapIndex+2]).normalize();
+                q2.setFromAxisAngle(y_axis, (Math.PI/180) * frames[keyFrameIndex + 1][mocapIndex+2]).normalize();
+                q1.slerp(q2, u);
+                q1.normalize();
+                rotatMatY.makeRotationFromQuaternion(q1);
+                
+                newTransMat.multiply(rotatMatZ).multiply(rotatMatX).multiply(rotatMatY);
+                mocapIndex += 3;
+                // Update the children
                 currentNode.joints.forEach(child => {
                     inOrderMoCapApply(u, child, keyFrameIndex, newTransMat, mocapIndex);
                 });
-            }
+            } 
         }
 
         function buildFigure(fileLines) {
