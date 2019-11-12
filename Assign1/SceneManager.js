@@ -33,7 +33,6 @@ export default class SceneManager {
             textKeyFrames.forEach(keyFrame => {
                 keyFrameList.push(new KeyFrame(keyFrame));
             });
-            console.log(keyFrameList)
             return keyFrameList;
         }
         function buildScene() {
@@ -74,7 +73,7 @@ export default class SceneManager {
                 }
             }
             for (let i = 0; i < sceneObjects.length; i++)
-                sceneObjects[i].update(elapsedTime, keyFrames[keyFrameIndex], keyFrames[keyFrameIndex+1]);
+                sceneObjects[i].update(elapsedTime, keyFrames, keyFrameIndex);
             renderer.render(scene, camera);
         };
         this.onWindowResize = function () {

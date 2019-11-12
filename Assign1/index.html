@@ -8,6 +8,27 @@
 
 	<body>
 		<a href="https://cozzarin787.github.io" style="position: absolute; top:0; left:0; z-index:1; color:cyan">Back</a>
+		<div class="UI" style="padding-left: 20px;
+		padding-right: 20px;
+		height: 18%;
+		position: absolute;
+		top: 0px;
+		right: 0px;
+		background-color: aliceblue;
+		opacity: 0.5;">
+			<ul style="align-content: center;"></ul>
+				<div class="SlowInput" style="align-content: center;">
+					<ul>
+						<input id="slowInOut" type="checkbox" name="slowIn/out_timing">Slow In/Out</input>
+					</ul>
+				</div>
+				<select id="InterpVal" style="align-content: center;">
+					<option value="Lerp">Linear Interpolation</option>
+					<option value="CatRom">Catmull-Rom</option>
+					<option value="de Casteljau Construction">de Casteljau Construction</option>
+				</select>
+			</ul>
+		</div>
 		<canvas id="canvas"></canvas>
 		<script src="three/build/three.js"></script>
 		<script src="main.js" type="module"></script>
