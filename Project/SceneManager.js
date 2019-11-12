@@ -44,7 +44,7 @@ export default class SceneManager {
         
         // Setup data buffers for WebGL use. These buffers will contain data for particles and grid cells for the GPU
         function createBuffers() {
-
+            
         }
 
         // FLUID SIMULATION METHOD:
