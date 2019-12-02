@@ -1,4 +1,5 @@
 import * as THREE from "./three/build/three.module.js";
+import * as dat from "./three/examples/jsm/libs/dat.gui.module.js"
 import { OrbitControls } from "./three/examples/jsm/controls/OrbitControls.js";
 import { DragControls } from "./three/examples/jsm/controls/DragControls.js";
 import CubeObject from "./SceneObjects/cube.js";
@@ -40,7 +41,15 @@ export default class SceneManager {
         const worldVoxel = new THREE.Box3(new THREE.Vector3(-100,0,-100), new THREE.Vector3(100,50,100))
         const treeBuilder = new KDTreeBuilder();
         var KD_TREE = treeBuilder.getNode(worldVoxel, rigidBodies, 0, scene);
-        var stopKdTreeUpdate = true;
+
+        // Setup dat.gui
+        var gui = new dat.GUI();
+        gui.add(treeBuilder, "MAX_DEPTH");
+        gui.add(treeBuilder, "SurfaceAreaHeuristicParitioning");
+        gui.addColor(treeBuilder, "xPartitionColor");
+        gui.addColor(treeBuilder, "yPartitionColor");
+        gui.addColor(treeBuilder, "zPartitionColor");
+        gui.add(treeBuilder, "DisplayKdTree");
         
         function buildScene() {
             const scene = new THREE.Scene();
@@ -194,9 +203,6 @@ export default class SceneManager {
                     case 67:
                         addCubeToScene(position);
                         break;
-                    case 85:
-                        stopKdTreeUpdate = !stopKdTreeUpdate;
-                        break;
                 }
             };
         }
@@ -208,7 +214,7 @@ export default class SceneManager {
             var deltaTime = clock.getDelta();
             orbControls.update();
             updatePhysics( deltaTime );
-            if (!stopKdTreeUpdate) {
+            if (treeBuilder.DisplayKdTree) {
                 updateKdTree();
             }
             renderer.render(scene, camera);

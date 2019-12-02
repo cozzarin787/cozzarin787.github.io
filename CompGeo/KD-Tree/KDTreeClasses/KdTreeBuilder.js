@@ -8,8 +8,13 @@ export default class KdTreeBuilder {
         const Y_AXIS = 1;
         const Z_AXIS = 2;
 
-        const MAX_DEPTH = 20;
+        this.MAX_DEPTH = 20;
         this.curAxis = 0;
+        this.SurfaceAreaHeuristicParitioning = false;
+        this.xPartitionColor = 0xff0000;
+        this.yPartitionColor = 0x00ff00;
+        this.zPartitionColor = 0x0000ff;
+        this.DisplayKdTree = false;
 
         this.getPartitionPlane = function(voxel, scene) {
             // Alternate axis
@@ -29,7 +34,7 @@ export default class KdTreeBuilder {
                 case X_AXIS:
                     normal.set(1, 0, 0);
                     geometry = new THREE.PlaneGeometry(voxelDistances.z, voxelDistances.y);
-                    material = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, opacity: 0.1, transparent: true});
+                    material = new THREE.MeshBasicMaterial({color: this.xPartitionColor, side: THREE.DoubleSide, opacity: 0.1, transparent: true});
                     plane = new THREE.Mesh(geometry, material);
                     plane.position.set(spatialMedian.x, spatialMedian.y, spatialMedian.z);
                     plane.rotation.set(0, Math.PI * (90 / 180), 0);
@@ -38,7 +43,7 @@ export default class KdTreeBuilder {
                 case Y_AXIS:
                     normal.set(0, 1, 0);
                     geometry = new THREE.PlaneGeometry(voxelDistances.x, voxelDistances.z);
-                    material = new THREE.MeshBasicMaterial({color: 0x00ff00, side: THREE.DoubleSide, opacity: 0.1, transparent: true});
+                    material = new THREE.MeshBasicMaterial({color: this.yPartitionColor, side: THREE.DoubleSide, opacity: 0.1, transparent: true});
                     plane = new THREE.Mesh(geometry, material);
                     plane.position.set(spatialMedian.x, spatialMedian.y, spatialMedian.z);
                     plane.rotation.set(Math.PI * (90 / 180), 0, 0);
@@ -47,7 +52,7 @@ export default class KdTreeBuilder {
                 case Z_AXIS:
                     normal.set(0, 0, 1);
                     geometry = new THREE.PlaneGeometry(voxelDistances.x, voxelDistances.y);
-                    material = new THREE.MeshBasicMaterial({color: 0x0000ff, side: THREE.DoubleSide, opacity: 0.1, transparent: true});
+                    material = new THREE.MeshBasicMaterial({color: this.zPartitionColor, side: THREE.DoubleSide, opacity: 0.1, transparent: true});
                     plane = new THREE.Mesh(geometry, material);
                     plane.position.set(spatialMedian.x, spatialMedian.y, spatialMedian.z);
                     scene.add( plane );
@@ -57,8 +62,8 @@ export default class KdTreeBuilder {
         }
 
         this.getNode = function(voxel, primitives, depth, scene) {
-            if (primitives.length <= 1 || depth == MAX_DEPTH) {
-                if (depth == MAX_DEPTH) {
+            if (primitives.length <= 1 || depth == this.MAX_DEPTH) {
+                if (depth == this.MAX_DEPTH) {
                     console.log("Max depth reached")
                 }
                 return new KdLeaf(primitives);
@@ -79,19 +84,19 @@ export default class KdTreeBuilder {
                         seperateValue = (voxel.max.x + voxel.min.x) / 2.0;
                         max = new THREE.Vector3(seperateValue, voxel.max.y, voxel.max.z);
                         min = new THREE.Vector3(seperateValue, voxel.min.y, voxel.min.z);
-                        color = 0xff0000;
+                        color = this.xPartitionColor;
                         break;
                     case Y_AXIS:
                         seperateValue = (voxel.max.y + voxel.min.y) / 2.0;
                         max = new THREE.Vector3(voxel.max.x, seperateValue, voxel.max.z);
                         min = new THREE.Vector3(voxel.min.x, seperateValue, voxel.min.z);
-                        color = 0x00ff00;
+                        color = this.yPartitionColor;
                         break;
                     case Z_AXIS:
                         seperateValue = (voxel.max.z + voxel.min.z) / 2.0;
                         max = new THREE.Vector3(voxel.max.x, voxel.max.y, seperateValue);
                         min = new THREE.Vector3(voxel.min.x, voxel.min.y, seperateValue);
-                        color = 0x0000ff;
+                        color = this.zPartitionColor;
                         break;
                 }
                 var v1 = new THREE.Box3(voxel.min, max);
