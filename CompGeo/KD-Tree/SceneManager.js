@@ -33,7 +33,6 @@ export default class SceneManager {
         const rigidBodies = [];
         const sceneObjects = [];
         const dragObjects = [];
-        var temp;
         addSphereToScene([2,20,2]);
         setupKeyControls();
 
@@ -113,17 +112,15 @@ export default class SceneManager {
             for ( var i = 0; i < rigidBodies.length; i++ ) {
                 var objThree = rigidBodies[ i ];
                 var objAmmo = objThree.userData;
-                if (objAmmo != null) {
-                    var ms = objAmmo.getMotionState();
-                    if ( ms ) {
-            
-                        ms.getWorldTransform( tmpTrans );
-                        var p = tmpTrans.getOrigin();
-                        var q = tmpTrans.getRotation();
-                        objThree.position.set( p.x(), p.y(), p.z() );
-                        objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
-            
-                    }
+                var ms = objAmmo.getMotionState();
+                if ( ms ) {
+        
+                    ms.getWorldTransform( tmpTrans );
+                    var p = tmpTrans.getOrigin();
+                    var q = tmpTrans.getRotation();
+                    objThree.position.set( p.x(), p.y(), p.z() );
+                    objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
+        
                 }
             }
         
@@ -134,20 +131,24 @@ export default class SceneManager {
             dragObjects.push(sceneObjects[sceneObjects.length - 1].ball)
             dragControls = new DragControls( dragObjects, camera, renderer.domElement);
             dragControls.addEventListener( 'dragstart', function ( event ) {
+                orbControls.enabled = false;
                 event.object.material.emissive.set( 0xaaaaaa );
             } );
             dragControls.addEventListener( 'drag', function ( event ) {
-                var vector = new THREE.Vector3(event.clientX, event.clientY, 0.5);
-                vector.unproject( camera );
-                var dir = vector.sub( camera.position ).normalize();
-                var distance = - camera.position.z / dir.z;
-                var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+                event.object.userData.activate();
+                var locationX = event.object.position.x;
+                var locationZ = event.object.position.z;
+                var coords = new THREE.Vector3(locationX, 0, locationZ);
+                scene.worldToLocal(coords);
+                var a = Math.min(100,Math.max(-100,coords.x));  // clamp coords to the range -19 to 19, so object stays on ground
+                var b = Math.min(100,Math.max(-100,coords.z));
                 var transform = new Ammo.btTransform();
                 transform.setIdentity();
-                transform.setOrigin( new Ammo.btVector3( pos.x, pos.y, pos.z ) );
+                transform.setOrigin( new Ammo.btVector3( a, 3, b ) );
                 event.object.userData.setWorldTransform(transform);
             } );
             dragControls.addEventListener( 'dragend', function ( event ) {
+                orbControls.enabled = true;
                 event.object.material.emissive.set( 0x000000 );
             } );
         }
@@ -157,20 +158,24 @@ export default class SceneManager {
             dragObjects.push(sceneObjects[sceneObjects.length - 1].cube)
             dragControls = new DragControls( dragObjects, camera, renderer.domElement);
             dragControls.addEventListener( 'dragstart', function ( event ) {
+                orbControls.enabled = false;
                 event.object.material.emissive.set( 0xaaaaaa );
             } );
             dragControls.addEventListener( 'drag', function ( event ) {
-                var vector = new THREE.Vector3(event.clientX, event.clientY, 0.5);
-                vector.unproject( camera );
-                var dir = vector.sub( camera.position ).normalize();
-                var distance = - camera.position.z / dir.z;
-                var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+                event.object.userData.activate();
+                var locationX = event.object.position.x;
+                var locationZ = event.object.position.z;
+                var coords = new THREE.Vector3(locationX, 0, locationZ);
+                scene.worldToLocal(coords);
+                var a = Math.min(100,Math.max(-100,coords.x));  // clamp coords to the range -19 to 19, so object stays on ground
+                var b = Math.min(100,Math.max(-100,coords.z));
                 var transform = new Ammo.btTransform();
                 transform.setIdentity();
-                transform.setOrigin( new Ammo.btVector3( pos.x, pos.y, pos.z ) );
+                transform.setOrigin( new Ammo.btVector3( a, 3, b ) );
                 event.object.userData.setWorldTransform(transform);
             } );
             dragControls.addEventListener( 'dragend', function ( event ) {
+                orbControls.enabled = true;
                 event.object.material.emissive.set( 0x000000 );
             } );
         }
