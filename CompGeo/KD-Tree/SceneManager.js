@@ -44,7 +44,7 @@ export default class SceneManager {
 
         // Setup dat.gui
         var gui = new dat.GUI();
-        gui.add(treeBuilder, "MAX_DEPTH");
+        gui.add(treeBuilder, "MAX_DEPTH", 1, 25, 1);
         gui.add(treeBuilder, "SurfaceAreaHeuristicParitioning");
         gui.addColor(treeBuilder, "xPartitionColor");
         gui.addColor(treeBuilder, "yPartitionColor");
