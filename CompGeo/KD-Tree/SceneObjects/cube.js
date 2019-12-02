@@ -8,15 +8,15 @@ export default class SphereObject {
         var mass = 1;
 
         //threeJS Section
-        var cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshPhongMaterial({color: 0xff0505}));
+        this.cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshPhongMaterial({color: 0xff0505}));
 
-        cube.position.set(pos.x, pos.y, pos.z);
-        cube.scale.set(scale.x, scale.y, scale.z);
+        this.cube.position.set(pos.x, pos.y, pos.z);
+        this.cube.scale.set(scale.x, scale.y, scale.z);
     
-        cube.castShadow = true;
-        cube.receiveShadow = true;
-        cube.geometry.computeBoundingBox();
-        scene.add(cube);
+        this.cube.castShadow = true;
+        this.cube.receiveShadow = true;
+        this.cube.geometry.computeBoundingBox();
+        scene.add(this.cube);
 
         //Ammojs Section
         var transform = new Ammo.btTransform();
@@ -37,7 +37,7 @@ export default class SphereObject {
 
         physicsWorld.addRigidBody( body );
 
-        cube.userData = body;
-        rigidBodies.push(cube);
+        this.cube.userData = body;
+        rigidBodies.push(this.cube);
     }
 }

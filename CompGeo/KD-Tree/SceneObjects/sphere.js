@@ -8,15 +8,14 @@ export default class SphereObject {
         var mass = 1;
 
         //threeJS Section
-        var ball = new THREE.Mesh(new THREE.SphereBufferGeometry(radius), new THREE.MeshPhongMaterial({color: 0xff0505}));
+        this.ball = new THREE.Mesh(new THREE.SphereBufferGeometry(radius), new THREE.MeshPhongMaterial({color: 0xff0505}));
 
-        ball.position.set(pos.x, pos.y, pos.z);
+        this.ball.position.set(pos.x, pos.y, pos.z);
 
-        ball.castShadow = true;
-        ball.receiveShadow = true;
-        ball.geometry.computeBoundingBox();
-        scene.add(ball);
-
+        this.ball.castShadow = true;
+        this.ball.receiveShadow = true;
+        this.ball.geometry.computeBoundingBox();
+        scene.add(this.ball);
 
         //Ammojs Section
         var transform = new Ammo.btTransform();
@@ -36,7 +35,7 @@ export default class SphereObject {
 
         physicsWorld.addRigidBody( body );
 
-        ball.userData = body;
-        rigidBodies.push(ball);
+        this.ball.userData = body;
+        rigidBodies.push(this.ball);
     }
 }

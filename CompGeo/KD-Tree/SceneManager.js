@@ -1,5 +1,6 @@
 import * as THREE from "./three/build/three.module.js";
 import { OrbitControls } from "./three/examples/jsm/controls/OrbitControls.js";
+import { DragControls } from "./three/examples/jsm/controls/DragControls.js";
 import CubeObject from "./SceneObjects/cube.js";
 import SphereObject from "./SceneObjects/sphere.js"
 import PlaneObject from "./SceneObjects/plane.js";
@@ -21,8 +22,8 @@ export default class SceneManager {
         const camera = buildCamera(screenDimensions);
         camera.position.set(0, 30, 70);
         camera.lookAt(new THREE.Vector3(0, 0, 0));
-        const controls = new OrbitControls( camera, renderer.domElement );
-        controls.enableKeys = true;
+        const orbControls = new OrbitControls( camera, renderer.domElement );
+        var dragControls = new DragControls( [], camera, renderer.domElement);
         addSceneLights(scene);
 
         //AmmoJs Physics Initialization
@@ -31,6 +32,8 @@ export default class SceneManager {
         const sceneFloor = new PlaneObject(scene, physicsWorld);
         const rigidBodies = [];
         const sceneObjects = [];
+        const dragObjects = [];
+        var temp;
         addSphereToScene([2,20,2]);
         setupKeyControls();
 
@@ -110,24 +113,66 @@ export default class SceneManager {
             for ( var i = 0; i < rigidBodies.length; i++ ) {
                 var objThree = rigidBodies[ i ];
                 var objAmmo = objThree.userData;
-                var ms = objAmmo.getMotionState();
-                if ( ms ) {
-        
-                    ms.getWorldTransform( tmpTrans );
-                    var p = tmpTrans.getOrigin();
-                    var q = tmpTrans.getRotation();
-                    objThree.position.set( p.x(), p.y(), p.z() );
-                    objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
-        
+                if (objAmmo != null) {
+                    var ms = objAmmo.getMotionState();
+                    if ( ms ) {
+            
+                        ms.getWorldTransform( tmpTrans );
+                        var p = tmpTrans.getOrigin();
+                        var q = tmpTrans.getRotation();
+                        objThree.position.set( p.x(), p.y(), p.z() );
+                        objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
+            
+                    }
                 }
             }
         
         }
         function addSphereToScene(position) {
+            dragControls.dispose();
             sceneObjects.push(new SphereObject(position, scene, physicsWorld, rigidBodies));
+            dragObjects.push(sceneObjects[sceneObjects.length - 1].ball)
+            dragControls = new DragControls( dragObjects, camera, renderer.domElement);
+            dragControls.addEventListener( 'dragstart', function ( event ) {
+                event.object.material.emissive.set( 0xaaaaaa );
+            } );
+            dragControls.addEventListener( 'drag', function ( event ) {
+                var vector = new THREE.Vector3(event.clientX, event.clientY, 0.5);
+                vector.unproject( camera );
+                var dir = vector.sub( camera.position ).normalize();
+                var distance = - camera.position.z / dir.z;
+                var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+                var transform = new Ammo.btTransform();
+                transform.setIdentity();
+                transform.setOrigin( new Ammo.btVector3( pos.x, pos.y, pos.z ) );
+                event.object.userData.setWorldTransform(transform);
+            } );
+            dragControls.addEventListener( 'dragend', function ( event ) {
+                event.object.material.emissive.set( 0x000000 );
+            } );
         }
         function addCubeToScene(position) {
+            dragControls.dispose();
             sceneObjects.push(new CubeObject(position, scene, physicsWorld, rigidBodies));
+            dragObjects.push(sceneObjects[sceneObjects.length - 1].cube)
+            dragControls = new DragControls( dragObjects, camera, renderer.domElement);
+            dragControls.addEventListener( 'dragstart', function ( event ) {
+                event.object.material.emissive.set( 0xaaaaaa );
+            } );
+            dragControls.addEventListener( 'drag', function ( event ) {
+                var vector = new THREE.Vector3(event.clientX, event.clientY, 0.5);
+                vector.unproject( camera );
+                var dir = vector.sub( camera.position ).normalize();
+                var distance = - camera.position.z / dir.z;
+                var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+                var transform = new Ammo.btTransform();
+                transform.setIdentity();
+                transform.setOrigin( new Ammo.btVector3( pos.x, pos.y, pos.z ) );
+                event.object.userData.setWorldTransform(transform);
+            } );
+            dragControls.addEventListener( 'dragend', function ( event ) {
+                event.object.material.emissive.set( 0x000000 );
+            } );
         }
         function setupKeyControls() {
             document.onkeydown = function(e) {
@@ -156,7 +201,7 @@ export default class SceneManager {
         }
         this.update = function () {
             var deltaTime = clock.getDelta();
-            controls.update();
+            orbControls.update();
             updatePhysics( deltaTime );
             if (!stopKdTreeUpdate) {
                 updateKdTree();
