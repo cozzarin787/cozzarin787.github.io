@@ -144,7 +144,7 @@ export default class SceneManager {
                 var b = Math.min(100,Math.max(-100,coords.z));
                 var transform = new Ammo.btTransform();
                 transform.setIdentity();
-                transform.setOrigin( new Ammo.btVector3( a, 3, b ) );
+                transform.setOrigin( new Ammo.btVector3( a, 2, b ) );
                 event.object.userData.setWorldTransform(transform);
             } );
             dragControls.addEventListener( 'dragend', function ( event ) {
@@ -171,7 +171,7 @@ export default class SceneManager {
                 var b = Math.min(100,Math.max(-100,coords.z));
                 var transform = new Ammo.btTransform();
                 transform.setIdentity();
-                transform.setOrigin( new Ammo.btVector3( a, 3, b ) );
+                transform.setOrigin( new Ammo.btVector3( a, 2, b ) );
                 event.object.userData.setWorldTransform(transform);
             } );
             dragControls.addEventListener( 'dragend', function ( event ) {

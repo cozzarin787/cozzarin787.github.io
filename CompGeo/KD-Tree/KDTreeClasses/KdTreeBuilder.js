@@ -8,7 +8,7 @@ export default class KdTreeBuilder {
         const Y_AXIS = 1;
         const Z_AXIS = 2;
 
-        const MAX_DEPTH = 15;
+        const MAX_DEPTH = 20;
         this.curAxis = 0;
 
         this.getPartitionPlane = function(voxel, scene) {
@@ -112,26 +112,18 @@ export default class KdTreeBuilder {
                         if (v1.intersectsSphere(sphere)) {
                             L_1.push(primitives[i]);
                         }
-                        else if (v2.intersectsSphere(sphere)) {
+                        if (v2.intersectsSphere(sphere)) {
                             L_2.push(primitives[i]);
                         }
-                        // else {
-                        //     L_1.push(primitives[i]);
-                        //     L_2.push(primitives[i]);
-                        // }
                     }
                     else {
                         var objBBox = new THREE.Box3().setFromObject(primitives[i]);
                         if (v1.intersectsBox(objBBox)) {
                             L_1.push(primitives[i]);
                         }
-                        else if (v2.intersectsBox(objBBox)) {
+                        if (v2.intersectsBox(objBBox)) {
                             L_2.push(primitives[i]);
                         }
-                        // else {
-                        //     L_1.push(primitives[i]);
-                        //     L_2.push(primitives[i]);
-                        // }
                     }
                 }
                 

@@ -2,7 +2,7 @@ import * as THREE from "../three/build/three.module.js";
 
 export default class PlaneObject {
     constructor(scene, physicsWorld) {
-        var pos = {x: 0, y: 0, z: 0};
+        var pos = {x: 0, y: -1, z: 0};
         var scale = {x: 200, y: 2, z: 200};
         var quat = {x: 0, y: 0, z: 0, w: 1};
         var mass = 0;
