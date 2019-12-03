@@ -50,8 +50,8 @@ export default class SceneManager {
         gui.addColor(treeBuilder, "zPartitionColor");
         gui.add(treeBuilder, "DisplayKdTree");
         gui.add(treeBuilder, "SurfaceAreaHeuristicParitioning");
-        gui.add(treeBuilder, "traversalCostSAH", 1, 10);
-        gui.add(treeBuilder, "intersectCostSAH", 1, 10);
+        gui.add(treeBuilder, "traversalCostSAH", 0, 10);
+        gui.add(treeBuilder, "intersectCostSAH", 0, 10);
         
         function buildScene() {
             const scene = new THREE.Scene();

@@ -329,44 +329,58 @@ export default class KdTreeBuilder {
                 var max;
                 var seperateValue;
                 var color;
-                switch (depth % 3)
-                {
-                    case X_AXIS:
-                        if (this.SurfaceAreaHeuristicParitioning) {
+                var v1;
+                var v2;
+                if (this.SurfaceAreaHeuristicParitioning) {
+                    switch (this.curAxis)
+                    {
+                        case X_AXIS:
                             seperateValue = s_plane.position.x;
-                        }
-                        else {
-                            seperateValue = (voxel.max.x + voxel.min.x) / 2.0;
-                        }
-                        max = new THREE.Vector3(seperateValue, voxel.max.y, voxel.max.z);
-                        min = new THREE.Vector3(seperateValue, voxel.min.y, voxel.min.z);
-                        color = this.xPartitionColor;
-                        break;
-                    case Y_AXIS:
-                        if (this.SurfaceAreaHeuristicParitioning) {
+                            max = new THREE.Vector3(seperateValue, voxel.max.y, voxel.max.z);
+                            min = new THREE.Vector3(seperateValue, voxel.min.y, voxel.min.z);
+                            color = this.xPartitionColor;
+                            break;
+                        case Y_AXIS:
                             seperateValue = s_plane.position.y;
-                        }
-                        else {
-                            seperateValue = (voxel.max.y + voxel.min.y) / 2.0;
-                        }
-                        max = new THREE.Vector3(voxel.max.x, seperateValue, voxel.max.z);
-                        min = new THREE.Vector3(voxel.min.x, seperateValue, voxel.min.z);
-                        color = this.yPartitionColor;
-                        break;
-                    case Z_AXIS:
-                        if (this.SurfaceAreaHeuristicParitioning) {
+                            max = new THREE.Vector3(voxel.max.x, seperateValue, voxel.max.z);
+                            min = new THREE.Vector3(voxel.min.x, seperateValue, voxel.min.z);
+                            color = this.yPartitionColor;
+                            break;
+                        case Z_AXIS:
                             seperateValue = s_plane.position.z;
-                        }
-                        else {
-                            seperateValue = (voxel.max.z + voxel.min.z) / 2.0;
-                        }
-                        max = new THREE.Vector3(voxel.max.x, voxel.max.y, seperateValue);
-                        min = new THREE.Vector3(voxel.min.x, voxel.min.y, seperateValue);
-                        color = this.zPartitionColor;
-                        break;
+                            max = new THREE.Vector3(voxel.max.x, voxel.max.y, seperateValue);
+                            min = new THREE.Vector3(voxel.min.x, voxel.min.y, seperateValue);
+                            color = this.zPartitionColor;
+                            break;
+                    }
+                    v1 = new THREE.Box3(voxel.min, max);
+                    v2 = new THREE.Box3(min, voxel.max);
                 }
-                var v1 = new THREE.Box3(voxel.min, max);
-                var v2 = new THREE.Box3(min, voxel.max);
+                else {
+                    switch (depth % 3)
+                    {
+                        case X_AXIS:
+                            seperateValue = (voxel.max.x + voxel.min.x) / 2.0;
+                            max = new THREE.Vector3(seperateValue, voxel.max.y, voxel.max.z);
+                            min = new THREE.Vector3(seperateValue, voxel.min.y, voxel.min.z);
+                            color = this.xPartitionColor;
+                            break;
+                        case Y_AXIS:
+                            seperateValue = (voxel.max.y + voxel.min.y) / 2.0;
+                            max = new THREE.Vector3(voxel.max.x, seperateValue, voxel.max.z);
+                            min = new THREE.Vector3(voxel.min.x, seperateValue, voxel.min.z);
+                            color = this.yPartitionColor;
+                            break;
+                        case Z_AXIS:
+                            seperateValue = (voxel.max.z + voxel.min.z) / 2.0;
+                            max = new THREE.Vector3(voxel.max.x, voxel.max.y, seperateValue);
+                            min = new THREE.Vector3(voxel.min.x, voxel.min.y, seperateValue);
+                            color = this.zPartitionColor;
+                            break;
+                    }
+                    v1 = new THREE.Box3(voxel.min, max);
+                    v2 = new THREE.Box3(min, voxel.max);
+                }
 
                 // Create visualization of voxels
                 var helper1 = new THREE.Box3Helper( v1, color );
