@@ -61,7 +61,7 @@ export default class KdTreeBuilder {
 
         this.getPartitionPlaneSAH = function(voxel, scene, primitives) {
             // epsilon for plane event positions
-            var epsilon = 0.0001
+            var epsilon = 0.001
             // Optimal plane
             var opt_plane = [Number.MAX_VALUE, 0, X_AXIS];
 
@@ -216,6 +216,7 @@ export default class KdTreeBuilder {
                             // Found next plane, update left and right prims and calculate SAH
                             N_R -= p_end;
                             var plane_cost = this.calcSAH(voxel, p, Z_AXIS, N_L, N_R);
+                            console.log(plane_cost)
                             if (plane_cost < opt_plane[0]) {
                                 opt_plane[0] = plane_cost;
                                 opt_plane[1] = p;
@@ -226,7 +227,10 @@ export default class KdTreeBuilder {
                         break;
                 }
             }
-
+            // Check to see if optimal plane cost is greater than termination cost
+            if (opt_plane[0] > this.intersectCostSAH * primitives.length) {
+                return false;
+            }
             // Construct and return the optimal split plane
             var spatialMedian = new THREE.Vector3();
             spatialMedian.addVectors(voxel.max, voxel.min).divideScalar(2.0);
