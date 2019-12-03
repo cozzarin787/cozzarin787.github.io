@@ -18,10 +18,7 @@ export default class KdTreeBuilder {
         this.zPartitionColor = 0x0000ff;
         this.DisplayKdTree = false;
 
-        this.getPartitionPlane = function(voxel, scene) {
-            // Alternate axis
-            this.curAxis++;
-
+        this.getPartitionPlane = function(voxel, scene, depth) {
             var spatialMedian = new THREE.Vector3();
             spatialMedian.addVectors(voxel.max, voxel.min).divideScalar(2.0);
             var voxelDistances = new THREE.Vector3();
@@ -31,7 +28,7 @@ export default class KdTreeBuilder {
             var geometry;
             var material;
             var plane;
-            switch(this.curAxis % 3) {
+            switch(depth % 3) {
                 case X_AXIS:
                     geometry = new THREE.PlaneGeometry(voxelDistances.z, voxelDistances.y);
                     material = new THREE.MeshBasicMaterial({color: this.xPartitionColor, side: THREE.DoubleSide, opacity: 0.1, transparent: true});
@@ -324,8 +321,7 @@ export default class KdTreeBuilder {
                     partitionAxis = this.curAxis;
                 }
                 else {
-                    var s_plane = this.getPartitionPlane(voxel, scene);
-                    partitionAxis = this.curAxis % 3;
+                    var s_plane = this.getPartitionPlane(voxel, scene, depth);
                 }
 
                 // Create new voxels based on partitioning plane
@@ -333,7 +329,7 @@ export default class KdTreeBuilder {
                 var max;
                 var seperateValue;
                 var color;
-                switch (this.curAxis % 3)
+                switch (depth % 3)
                 {
                     case X_AXIS:
                         if (this.SurfaceAreaHeuristicParitioning) {
