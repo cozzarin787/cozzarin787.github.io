@@ -45,11 +45,13 @@ export default class SceneManager {
         // Setup dat.gui
         var gui = new dat.GUI();
         gui.add(treeBuilder, "MAX_DEPTH", 1, 25, 1);
-        gui.add(treeBuilder, "SurfaceAreaHeuristicParitioning");
         gui.addColor(treeBuilder, "xPartitionColor");
         gui.addColor(treeBuilder, "yPartitionColor");
         gui.addColor(treeBuilder, "zPartitionColor");
         gui.add(treeBuilder, "DisplayKdTree");
+        gui.add(treeBuilder, "SurfaceAreaHeuristicParitioning");
+        gui.add(treeBuilder, "traversalCostSAH", 1, 10);
+        gui.add(treeBuilder, "intersectCostSAH", 1, 10);
         
         function buildScene() {
             const scene = new THREE.Scene();
