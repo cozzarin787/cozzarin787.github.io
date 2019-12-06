@@ -9,47 +9,62 @@
     <h2>Team Members:</h2>
     <p style="text-indent: 50px;">Jacob Cozzarin</p>
 
+    <h2>Link to Project:</h2>
+    <li><a href="https://cozzarin787.github.io/CompGeo/KD-Tree">KD-Tree Pedagogical Aid</a></li>
+
     <h2>Problem Description:</h2>
-    <p style="text-indent: 50px;">Develop a pedagogical aid using three.js to showcase the building and maintaining of a kd-tree on a dynamic scene. The scene will be interactable and allow the user to place and move objects, showing the divisions in the scene created by the kd-tree algorithm. Possibly add a pedagogical aid for when a ray is shot into the world and visualize the tests run on the kd-tree in respect to the world.</p>
+    <p style="text-indent: 50px;">Develop a pedagogical aid using three.js to showcase the building and maintaining of a kd-tree on a dynamic scene. The scene will be interactable and allow the user to place and move objects, showing the divisions in the scene created by the kd-tree algorithm. Allow for full control of KD-Tree construction parameters to switch between plane partitioning strategies, max tree depth, and more.</p>
     
     <h2>Background information:</h2>
-    <p style="text-indent: 50px;">A vital part of game development and graphics rendering is the ability to quickly compute intersection testing with objects in the scene. One of the best ways of reducing the amount intersection tests that need to be done is to organize/sort objects in the scene so test don't need to be performed unnecssarily if the objects aren't being hit. One way to organize/sort objects in the scene is by constructing a kd-tree and storing information for traversal to find the objects that need to be intersection tested. A visual tool can be used to help visualize a constructed kd-tree implementation and where the partition planes would lie in the scene. Possibly an added feature to spawn a ray and show how it traverses the kd-tree in respect to the world.</p>
+    <p style="text-indent: 50px;">A vital part of game development and graphics rendering is the ability to quickly compute intersection testing with objects in the scene. One of the best ways of reducing the amount of intersection tests that need to be done is to organize/sort objects in the scene so test don't need to be performed unnecssarily if the objects aren't being hit. One way to organize/sort objects in the scene is by constructing a kd-tree and storing information for traversal to find the objects that need to be intersection tested. A visual tool can be used to help visualize a constructed kd-tree implementation and where the partition planes would lie in the scene.</p>
 
-    <h2>Pseudo-code:</h2>
+    <h2>Algorithms and Pseudo-code:</h2>
     <h3>Build Kd-tree:</h3>
+    <p style="text-indent: 50px;"></p>
     <ul>
         <li>Node getNode (List of primitives L, Voxel V):</li>
         <ul>
             <li>if (Terminal (L, V)) return new leaf node (L)</li>
-            <li>Find partition plane P</li>
+            <li><bold>Find partition plane P</bold></li>
             <li>Split V with P producing V_front and V_rear</li>
             <li>Partition elements of L producing L_front and L_rear</li>
             <li>return new interior node (P, getNode(L_front, v_front), getNode (L_front, v_front))</li>
         </ul>
         <li>First call to getNode with the full list of primitives and world voxel will return the fully built kd-tree</li>
     </ul>
-    <h3>Add to Kd-tree:</h3>
+    <h3>Spatial Mean Plane Partitioning</h3>
+    <img src="../images/spatialMedian.PNG" alt="Spatial Mean Partitioning">
     <ul>
-        <li>insert(primitive p, Node kd-tree):</li>
-        <ul>
-            <li>search for leaf node in kd-tree that will hold p</li>
-            <li>if (leaf node has space): insert p into primitive list L of node</li>
-            <li>else</li>
-            <ul>
-                <li>choose a partition plane P</li>
-                <li>Split voxel V in node with P producing V_front and V_rear</li>
-                <li>Partition elements of L producing L_front and L_rear</li>
-                <li>replace leaf node with internal node</li>
-                <li>internal front = L_front, internal rear = L_rear</li>
-            </ul>
-        </ul>
-        <li>I will be animating and displaying the partitioning planes as objects are moved and added to the scene.</li>
+        <li>Naive approach to plane partitioning.</li>
+        <li>Axis-aligned planes and “round-robin” through each different axis</li>
+        <li>Voxel split in half along the current dimension/axis to create two sub-voxels of equal sizes</li>
+        <li>Partitioning planes are created/deconstructed and displayed visually as objects are moved and added to the scene.</li>
     </ul>
 
-    <h2>Interesting Choices (Algorithm):</h2>
+    <h3>Plane Partitioning - Surface Area Heuristic</h3>
     <ul>
-        <li>I plan on implementing the plane partitioning using a surface area heuristic algorithm to find optimal splits to balance the kd-tree. The surface area heuristic can also guide when to terminate a branch of a tree when the cost of spliting further is too high.</li>
+        <li>For each dimension, create a plane partition event queue with planes placed at min’s and max’s of the current dimension for each primitive. </li>
+        <ul>
+          <li>Sort the event queue (least to greatest)</li>
+          <li>Iterate through each event and calculate it’s SAH cost, make it the minimum cost seen so far if so</li>
+        </ul>
+        <li>At the end we should have found a plane with the minimum cost across all dimension (only on primitives and no interpolation of the space)</li>
     </ul>
+    <p style="text-indent: 50px;">With this algorithm, the time complexity of the plane partitioning using a surface area heuristic takes O(nlogn) since we need to sort the list of primitives each time. This slows down the construction of the KD-Tree compared to the constant time of doing splits on the spatial mean.</p>
+    <h3>SAH - Cost Function</h3>
+    <img src="../images/SAH.PNG" alt="SAH Cost Function">
+    <ul>
+      <li>K_T = Cost of Traversal</li>
+      <li>K_I = Cost of Intersection with primitive</li>
+      <li>SA(V_L) = Surface Area Left sub-voxel</li>
+      <li>SA(V) = Surface Area Parent voxel</li>
+      <li>|T_L| = Number of primitives split into the left sub-voxel</li>
+      <li>SA(V_R) = Surface Area of Right sub-voxel</li>
+      <li>|T_R| = Number of primitives split into the right sub-voxel</li>
+    </ul>
+
+    <h2>Implementation</h2>
+    <p style="text-indent: 50px;">The KD-Tree program is implemented using Three.js which is a Javascript library/interface for webGL applications. Camera controls and drag controls utilize existing example functionality in Three.js. (OrbitalControls.js and DragControls.js respectively). Simple gravity and collision physics is used to place objects in the scene utilizing Ammo.js. </p>
 
     <h2>Timeline:</h2>
     <table border="1" width="100%" cellspacing="2" cellpadding="2" height="494">
@@ -145,11 +160,14 @@
         </tr>
       </tbody>
     </table>
+    <h2>Future Work</h2>
+    <p style="text-indent: 50px;">The Surface Area Heuristic plane partitioning doesn't split the space effectively still. First, splits are only done on the min and max of each primitive in the scene for each dimension, where interpolation should be done to get more cost effective splits. The runtime of the SAH plane partitioning could be reduced to O(n) by processing the inital list of primitives, in the beginning of the KD-Tree construction, and keep track of their sorting throughout, allowing for the interation over possible planes making the algorithm O(n) and the total KD-Tree construction time O(nlogn). Another option to add is the ability to step through a ray intersection test, highlighting voxels that we are checking to show how the process works and see the tree structure within the scene.</p>
     <h2>References:</h2>
     <ul>
         <li>Professor Joe Geigel's Global Illumination slides</li>
         <li><a href="http://homes.ieu.edu.tr/~hakcan/projects/kdtree/kdTree.html">Kd-Tree Applet Demo Page</a></li>
         <li><a href="https://dl.acm.org/citation.cfm?doid=1457515.1409079">Real-time KD-tree constrution on graphics hardware</a></li>
+        <li><a href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4061547&isnumber=4061530">On building fast kd-Trees for Ray Tracing, and on doing that in O(N log N)</a></li>
     </ul>
 </body>
 </html>
