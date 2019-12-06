@@ -3,9 +3,9 @@ import Particle from "./particle.js"
 
 export default class ParticleSimulator {
     constructor() {
-        this.emitRate = 500;
+        this.emitRate = 10000;
         this.speed = 1;
-        this.particleSize = 10;
+        this.particleSize = 0.1;
         this.lifeTime = 2;
         this.emitterRadius = 1;
         this.emitColor = 0xffffff;
@@ -39,10 +39,10 @@ export default class ParticleSimulator {
              var x = randn_bm();
              var y = randn_bm();
              var z = randn_bm();
-             var pos = new THREE.Vector3(x, y, z).normalize().multiplyScalar(this.emitterRadius);
+             var pos = new THREE.Vector3(x, y, z).normalize().multiplyScalar(this.emitterRadius).add(this.position);
              // Create init velocity outwards with randomness
              var dir = new THREE.Vector3().subVectors(pos, this.position).normalize();
-             dir.multiplyScalar(Math.random());
+             dir.multiplyScalar(Math.random() * this.speed);
 
              // Create particle and add to list of particles
              var particle = new Particle(pos, dir, this.particleSize, this.emitColor, this.fadeColor);
@@ -56,17 +56,18 @@ export default class ParticleSimulator {
             for (var i = 0; i < this.totalParticles; i++) {
                 if (this.particleArray[i].active) {
                     this.particleArray[i].updateMotion(delta_t);
+                    this.particleGeometry.vertices[i] = this.particleArray[i].position.clone();
                     this.particleArray[i].updateRendering(this.lifeTime);
-
+                    this.particleGeometry.colors[i] = this.particleArray[i].color.clone();
                     // check if particle should expire
                     if (this.particleArray[i].age > this.lifeTime) {
                         this.particleArray[i].active = false;
                         recycleParticles.push(i);
                     }
-                    // update vertex color
-                    this.particleGeometry.colors[i] = new THREE.Color(this.particleArray[i].color.clone());
                 }
             }
+            this.particleGeometry.verticesNeedUpdate = true;
+            this.particleGeometry.colorsNeedUpdate = true;
 
             // if the particle system hasn't emitted all of the particles, keep emitting
             if (this.systemAge < this.lifeTime) {
@@ -88,8 +89,6 @@ export default class ParticleSimulator {
                 this.particleGeometry.vertices[i] = this.particleArray[i].position.clone();
                 this.particleGeometry.colors[i] = this.particleArray[i].color.clone();
             }
-
-            this.particleGeometry.verticesNeedUpdate = true;
 
             this.systemAge += delta_t;
         }

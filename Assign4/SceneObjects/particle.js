@@ -20,8 +20,7 @@ export default class Particle {
             s.addVectors(this.position, this.integrate(this.v.x, this.v.y, this.v.z, delta_t));
             this.position.set(s.x, s.y, s.z);
             // Update Translational Momentum
-            var v = new THREE.Vector3(this.v.x, this.v.y, this.v.z);
-            this.M = v.multiplyScalar(this.m);
+            this.M = this.v.clone().multiplyScalar(this.m);
             // Calculate velocity
             this.v.addVectors(this.M, this.integrate(this.M.x, this.M.y, this.M.z, delta_t)).divideScalar(this.m);
 

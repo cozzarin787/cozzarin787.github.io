@@ -14,15 +14,16 @@ export default class SceneManager {
         const renderer = buildRender(screenDimensions);
         const camera = buildCamera(screenDimensions);
         camera.position.set(0, 0, -20);
+        camera.lookAt(0,0,0);
         var oldTime = 0;
         var particleSim = new ParticleSimulator();
         particleSim.initializeSimulation(scene);
 
         // Setup dat.gui
         var gui = new dat.GUI();
-        gui.add(particleSim, "emitRate", 1, 1000, 1);
+        //gui.add(particleSim, "emitRate", 1, 100000, 1);
         gui.add(particleSim, "speed", 0.2, 10);
-        gui.add(particleSim, "lifeTime", 0.1, 5);
+        //gui.add(particleSim, "lifeTime", 0.1, 5);
         gui.add(particleSim, "emitterRadius", 0.2, 5);
         gui.addColor(particleSim, "emitColor");
         gui.addColor(particleSim, "fadeColor");
@@ -94,7 +95,7 @@ export default class SceneManager {
             vector.unproject( camera );
             var dir = vector.sub( camera.position ).normalize();
             var distance = - camera.position.z / dir.z;
-            particleSim.position = camera.position.clone().add( dir.multiplyScalar( distance ) );
+            particleSim.position = camera.position.clone().add( dir.multiplyScalar( distance ) ).sub(new THREE.Vector3(0, 23, 0)).multiply(new THREE.Vector3(1, -1, 1));
         } );
 
         this.onWindowResize = function () {
