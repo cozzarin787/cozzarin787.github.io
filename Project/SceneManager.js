@@ -1,5 +1,7 @@
 import * as THREE from "./three/build/three.module.js";
-import CubeObject from "./SceneObjects/cube.js";
+import * as dat from "./three/examples/jsm/libs/dat.gui.module.js"
+import FluidSimulator from "./SceneObjects/fluidSimulator.js";
+import { OrbitControls } from "./three/examples/jsm/controls/OrbitControls.js";
 
 export default class SceneManager {
     constructor(canvas) {
@@ -9,21 +11,66 @@ export default class SceneManager {
             height: canvas.height
         };
         const scene = buildScene();
-        const glContext = canvas.getContext( 'webgl2', { alpha: true});
-        const renderer = buildRender(screenDimensions, glContext);
+        addSceneLights(scene);
+        const renderer = buildRender(screenDimensions);
         const camera = buildCamera(screenDimensions);
-        camera.position.set(0, 1, 10);
-        camera.up = new THREE.Vector3(0, 1, 0);
-        camera.lookAt(new THREE.Vector3(11, 0, 0));
-        var sceneObjects = [];
-        
+        const controls = new OrbitControls( camera, renderer.domElement );
+        controls.enableKeys = true;
+        camera.position.set(0, 0, -70);
+        camera.lookAt(0,0,0);
+        var oldTime = 0;
+        var fluidSim = new FluidSimulator();
+        fluidSim.initializeSimulation(scene);
+
+        // Setup dat.gui
+        var gui = new dat.GUI();
+        gui.add(fluidSim, "simWidth", 2, 100, 2);
+        gui.add(fluidSim, "simHeight", 2, 100, 2);
+        gui.add(fluidSim, "simDepth", 2, 100, 2);
+        gui.add(fluidSim, "fluidWidth", 2, 100, 2);
+        gui.add(fluidSim, "fluidHeight", 2, 100, 2);
+        gui.add(fluidSim, "fluidDepth", 2, 100, 2);
+        gui.add(fluidSim, "particlesPerGridCell", 1, 20, 1);
+        gui.add(fluidSim, "particleSize", 0.1, 5);
+        gui.addColor(fluidSim, "emitColor");
+        gui.addColor(fluidSim, "fadeColor");
+
         function buildScene() {
             const scene = new THREE.Scene();
-            scene.background = new THREE.Color("#ffffff");
+            scene.background = new THREE.Color(0xcccccc);
             return scene;
         }
-        function buildRender({ width, height }, context) {
-            const renderer = new THREE.WebGLRenderer({ canvas: canvas, context: context, antialias: true, alpha: true });
+        function addSceneLights(scene) {
+            //Add hemisphere light
+            var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.1 );
+            hemiLight.color.setHSL( 0.6, 0.6, 0.6 );
+            hemiLight.groundColor.setHSL( 0.1, 1, 0.4 );
+            hemiLight.position.set( 0, 50, 0 );
+            scene.add( hemiLight );
+
+            //Add directional light
+            var dirLight = new THREE.DirectionalLight( 0xffffff , 1);
+            dirLight.color.setHSL( 0.1, 1, 0.95 );
+            dirLight.position.set( -1, 1.75, 1 );
+            dirLight.position.multiplyScalar( 100 );
+            scene.add( dirLight );
+
+            dirLight.castShadow = true;
+
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+
+            var d = 50;
+
+            dirLight.shadow.camera.left = -d;
+            dirLight.shadow.camera.right = d;
+            dirLight.shadow.camera.top = d;
+            dirLight.shadow.camera.bottom = -d;
+
+            dirLight.shadow.camera.far = 13500;
+        }
+        function buildRender({ width, height }) {
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
             const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
             renderer.setPixelRatio(DPR);
             renderer.setSize(width, height);
@@ -39,6 +86,24 @@ export default class SceneManager {
             const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
             return camera;
         }
+
+        this.update = function () {
+            const elapsedTime = clock.getElapsedTime();
+            const timeChange = elapsedTime - oldTime;
+            oldTime = elapsedTime;
+            fluidSim.simulateParticles(timeChange);
+            controls.update();
+            renderer.render(scene, camera);
+        };
+
+        this.onWindowResize = function () {
+            const { width, height } = canvas;
+            screenDimensions.width = width;
+            screenDimensions.height = height;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        };
 
         // WEBGL COMPONENT METHOD:
         
@@ -132,20 +197,5 @@ export default class SceneManager {
             //  this stabledt is compared to the actual time step dt, if it is larger than dt, the stabledt is set to dt
             //  the particles are then advected in six sub steps until it has reached dt. 
         // update position based on velocity using RK 2 ODE solver. Errors with penetrating solids, so maybe correct if collision detected
-
-
-        this.update = function () {
-            for (let i = 0; i < sceneObjects.length; i++)
-                sceneObjects[i].update();
-            renderer.render(scene, camera);
-        };
-        this.onWindowResize = function () {
-            const { width, height } = canvas;
-            screenDimensions.width = width;
-            screenDimensions.height = height;
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
-        };
     }
 }
