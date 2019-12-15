@@ -4,7 +4,12 @@ import Particle from "./fluidParticle.js"
 export default class StaggerGridCell {
     constructor(type) {
         this.type = type;
-        this.velocity = new THREE.Vector3(0,0,0);
+        this.velocity_up = 0.0;
+        this.velocity_down = 0.0;
+        this.velocity_left = 0.0;
+        this.velocity_right = 0.0;
+        this.velocity_front = 0.0;
+        this.velocity_back = 0.0;
         this.particleIndices = [];
 
         this.initParticles = function(newParticles) {

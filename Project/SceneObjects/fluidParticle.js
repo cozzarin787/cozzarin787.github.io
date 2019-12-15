@@ -13,25 +13,16 @@ export default class FluidParticle {
         this.baseColor = new THREE.Color(baseColor);    // Water Color
         this.fadeColor = new THREE.Color(fadeColor);    // "White cap" color
         this.M = new THREE.Vector3();
+        this.gridUpdated = false;       // Bool to flag whether this particle's position in the grid has been updated
 
         var MAX_VELOCITY = 1000;
 
         // Update method used to animate the object based on basic physics
         this.updateMotion = function (delta_t) {
-            // Calculate Forces
-            // Gravity
-            var F_grav = new THREE.Vector3(0, -9.81, 0);
-            // Pressure
-            // Density
-
             // Find new position
             var s = new THREE.Vector3();
             s.addVectors(this.pos, this.integrate(this.v.x, this.v.y, this.v.z, delta_t));
             this.pos.set(s.x, s.y, s.z);
-            // Update Translational Momentum
-            this.M = this.v.clone().multiplyScalar(this.m);
-            // Calculate velocity
-            this.v.addVectors(this.v, this.integrate(F_grav.x, F_grav.y, F_grav.z, delta_t));
         };
 
         // Update method used to change color of the particle
@@ -40,8 +31,8 @@ export default class FluidParticle {
         }
 
         // Give initial force 
-        this.calcInitialForce = function (x, y, z) {
-            this.v.set(x, y, z);
+        this.setVelocity = function (v) {
+            this.v.set(v.x, v.y, v.z);
         }
 
         this.integrate = function(x, y, z, delta_t) {
