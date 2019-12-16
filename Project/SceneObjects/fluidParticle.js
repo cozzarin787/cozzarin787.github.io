@@ -22,14 +22,12 @@ export default class FluidParticle {
             // Find new position
             var newPos = new THREE.Vector3();
             newPos.addVectors(this.pos, this.integrate(this.v.x, this.v.y, this.v.z, delta_t, gridCell, x, y, z));
-            
-            
             this.pos.set(newPos.x, newPos.y, newPos.z);
         };
 
         // Update method used to change color of the particle
         this.updateRendering = function () {
-            this.color = this.baseColor.lerp(this.fadeColor, this.v.length() / MAX_VELOCITY);
+            this.color = this.baseColor.lerp(this.fadeColor, Math.abs(this.v.length()) / MAX_VELOCITY);
         }
 
         // Give initial force 

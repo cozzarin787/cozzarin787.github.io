@@ -20,7 +20,7 @@ export default class SceneManager {
         camera.lookAt(0,0,0);
         var oldTime = 0;
         var fluidSim = new FluidSimulator();
-        var helper1 = new THREE.Box3Helper( new THREE.Box3(new THREE.Vector3(-fluidSim.simWidth/2, -fluidSim.simHeight/2, -fluidSim.simDepth/2), new THREE.Vector3(fluidSim.simWidth/2, fluidSim.simHeight/2, fluidSim.simDepth/2)), 0x000000 );
+        var helper1 = new THREE.Box3Helper( new THREE.Box3(new THREE.Vector3(-fluidSim.simWidth/2 +1, -fluidSim.simHeight/2 +1, -fluidSim.simDepth/2 +1), new THREE.Vector3(fluidSim.simWidth/2 -1, fluidSim.simHeight/2 -1, fluidSim.simDepth/2 -1)), 0x000000 );
         scene.add( helper1 );
         fluidSim.initializeSimulation(scene);
 

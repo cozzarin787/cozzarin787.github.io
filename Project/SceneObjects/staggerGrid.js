@@ -10,6 +10,7 @@ export default class StaggerGridCell {
         this.velocity_right = 0.0;
         this.velocity_front = 0.0;
         this.velocity_back = 0.0;
+        this.pressure = 0.0;
         this.particleIndices = [];
 
         this.initParticles = function(newParticles) {
