@@ -34,6 +34,7 @@ export default class SceneManager {
         gui.add(fluidSim, "fluidDepth", 2, 100, 2);
         gui.add(fluidSim, "particlesPerGridCell", 1, 20, 1);
         gui.add(fluidSim, "particleSize", 0.1, 5);
+        gui.add(fluidSim, "flipness", 0, 1);
         gui.addColor(fluidSim, "emitColor");
         gui.addColor(fluidSim, "fadeColor");
 

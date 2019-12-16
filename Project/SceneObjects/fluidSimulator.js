@@ -16,11 +16,12 @@ export default class FluidSimulator {
         this.fluidHeight = 4;
         this.fluidDepth = 4;
         this.particlesPerGridCell = 8;
+        this.flipness = 0;
         this.particleSize = 0.5;
         this.emitColor = 0x0000ff;
         this.fadeColor = 0xc2ff;
         this.particleGrid = [];
-        this.particleGridCopy = [];
+        this.particleGridPrevVel = [];
         this.particleArray = [];
         this.gravity = -9.81;
 
@@ -265,10 +266,43 @@ export default class FluidSimulator {
             }
 
             // STEP 3
-            // (FLIP) Just save the grid from step 2/3 and keep it persistent
-            //this.particleGridCopy = FLIPCopy(this.particleGrid);
+            // Update labels of each voxel:
+            //  if voxel contains 1 or more particles 
+            //      FLUID
+            //  else label voxel as air
+            //  (Solids are set at the particle initialization step and do not change)
+            for (var i = 1; i < this.simWidth-1; i++) {
+                for (var j = 1; j < this.simHeight-1; j++) {
+                    for (var k = 1; k < this.simDepth-1; k++) {
+                        if (this.particleGrid[i][j][k].particleIndices.length != 0) {
+                            this.particleGrid[i][j][k].type = FLUID;
+                        }
+                        else {
+                            this.particleGrid[i][j][k].type = AIR;
+                        }
+                    }
+                }
+            }
 
             // STEP 4
+            // (FLIP) Just save the velocity grid from step 2/3 and keep it persistent
+            for (var i = 0; i < this.simWidth; i++) {
+                this.particleGridPrevVel[i] = [];
+                for (var j = 0; j < this.simHeight; j++) {
+                    this.particleGridPrevVel[i][j] = [];
+                    for (var k = 0; k < this.simDepth; k++) {
+                        this.particleGridPrevVel[i][j][k] = new StaggerGridCell(FLUID);
+                        this.particleGridPrevVel[i][j][k].velocity_right;
+                        this.particleGridPrevVel[i][j][k].velocity_left;
+                        this.particleGridPrevVel[i][j][k].velocity_up;
+                        this.particleGridPrevVel[i][j][k].velocity_down;
+                        this.particleGridPrevVel[i][j][k].velocity_back;
+                        this.particleGridPrevVel[i][j][k].velocity_front;
+                    }
+                }
+            }
+            
+            // STEP 5
             // Calculate and Apply Extern Forces (GRAVITY)
             // Add velocities (gravity and user interaction) by simple Euler integration 
             // V_new = V_old + F*delta_t
@@ -282,7 +316,7 @@ export default class FluidSimulator {
                 }
             }
 
-            // STEP 5
+            // STEP 6
             // Enforce Dirichlet Boundary condition: 
             //  "There should be no flow into or out of solid cells to which has the normal n."
             // If a fluid cell has a solid neighboring cell, the velocity componenets are checked and 
@@ -331,25 +365,6 @@ export default class FluidSimulator {
                     }
                 }
             }
-            
-            // STEP 6
-            // Update labels of each voxel:
-            //  if voxel contains 1 or more particles 
-            //      FLUID
-            //  else label voxel as air
-            //  (Solids are set at the particle initialization step and do not change)
-            for (var i = 1; i < this.simWidth-1; i++) {
-                for (var j = 1; j < this.simHeight-1; j++) {
-                    for (var k = 1; k < this.simDepth-1; k++) {
-                        if (this.particleGrid[i][j][k].particleIndices.length != 0) {
-                            this.particleGrid[i][j][k].type = FLUID;
-                        }
-                        else {
-                            this.particleGrid[i][j][k].type = AIR;
-                        }
-                    }
-                }
-            }
 
             // Step 7 (CONSERVE MASS)
             // COMPUTATIONALLY HEAVY need to solve Poisson equation
@@ -375,14 +390,78 @@ export default class FluidSimulator {
             // TODO FIGURE OUT SOLUTION METHOD FOR THIS SYSTEM OF EQUATIONS (Bridson: preconditioned conjugate gradient method)
             // Substract q from the velocities to conserve mass:
             //      V_df = V - DELTA * q
-            
+
+            // Calculate divergence to solve for pressure
+            for (var i = 1; i < this.simWidth-1; i++) {
+                for (var j = 1; j < this.simHeight-1; j++) {
+                    for (var k = 1; k < this.simDepth-1; k++) {
+                        var cell = this.particleGrid[i][j][k];
+                        if (cell.isFluid()) {
+                            cell.divergenceCenter = 
+                            ((cell.velocity_right - cell.velocity_left) +
+                            (cell.velocity_up - cell.velocity_down) +
+                            (cell.velocity_back - cell.velocity_front)) / 1.0;
+
+                            cell.divergenceCenter -= Math.max((cell.particleIndices.length - this.particlesPerGridCell) * 1.0, 0.0); // volume conservation
+                        }
+                        else if (cell.isAir()) {// Air = 0
+                            cell.divergenceCenter = 0.0;
+                        }
+                    }
+                }
+            }
+
+            // Perform Jacobi iteration to solve for each cell's pressure
+            var PRESSURE_JACOBI_ITERATIONS = 12;
+            for (var i = 0; i < PRESSURE_JACOBI_ITERATIONS; ++i) {
+                for (var i = 1; i < this.simWidth-1; i++) {
+                    for (var j = 1; j < this.simHeight-1; j++) {
+                        for (var k = 1; k < this.simDepth-1; k++) {
+                            var cell = this.particleGrid[i][j][k];
+                            if (cell.isFluid()) {
+                                cell.pressure = 
+                                (this.particleGrid[i-1][j][k].pressure + // left
+                                this.particleGrid[i+1][j][k].pressure + // right
+                                this.particleGrid[i][j+1][k].pressure + // up
+                                this.particleGrid[i][j-1][k].pressure + // down
+                                this.particleGrid[i][j][k+1].pressure + // back
+                                this.particleGrid[i][j][k-1].pressure - // front
+                                cell.divergenceCenter) / 6.0;
+                            }
+                            else if (cell.isAir()) {// Air = 0
+                                cell.pressure = 0.0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Converse mass by subtracting the pressure gradient from the velocity of the cell
+            for (var i = 1; i < this.simWidth-1; i++) {
+                for (var j = 1; j < this.simHeight-1; j++) {
+                    for (var k = 1; k < this.simDepth-1; k++) {
+                        var cell = this.particleGrid[i][j][k];
+                        if (cell.isFluid()) {
+                            var gradientX = this.particleGrid[i+1][j][k].pressure - this.particleGrid[i-1][j][k].pressure;
+                            var gradientY = this.particleGrid[i][j+1][k].pressure - this.particleGrid[i][j-1][k].pressure;
+                            var gradientZ = this.particleGrid[i][j][k+1].pressure - this.particleGrid[i][j][k-1].pressure;
+                            cell.velocity_left -= gradientX;
+                            cell.velocity_right -= gradientX;
+                            cell.velocity_up -= gradientY;
+                            cell.velocity_down -= gradientY;
+                            cell.velocity_back -= gradientZ;
+                            cell.velocity_front -= gradientZ;
+                        }
+                    }
+                }
+            }
 
             // For the following steps:
                 // Use trilinear interplation of the velocities of the eight neighboring grid-velocities to the 
                 // particle you are calculating the velocity for
-            // Step 8 (FLIP) PARTICLE UPDATE METHOD calcParticleVelocity
+            // Step 8 (PIC)
                 // update the velocity with the new velocity
-            // Step 9 (PIC) PARTICLE UPDATE METHOD calcParticleVelocity
+            // Step 9 (FLIP)
                 // interpolate the change in velocity and add it to the exiting particle velocity. 
             // Step 10 (PIC/FLIP) PATICLE UPDATE METHDO weightFLIP/PICVelocities
                 // linear combination of both resulting values from Step 8 and 9 (can be used to determine viscosity)
@@ -402,10 +481,12 @@ export default class FluidSimulator {
                                 var y_d = (p.pos.y - y);
                                 var z_d = (p.pos.z - z);
                                 
-                                // FLIP
-                                p.setVelocity(gridCell.getVelocity(x_d, y_d, z_d));
                                 // PIC
+                                var picVelocity = gridCell.getVelocity(x_d, y_d, z_d);
+                                // FLIP
+                                var flipVelocity = picVelocity.clone().add(picVelocity.clone().sub(this.particleGridPrevVel[i][j][k].getVelocity(x_d, y_d, z_d)));
                                 // PIC/FLIP
+                                p.v.lerpVectors(picVelocity, flipVelocity, this.flipness);
                             }
                         }
                     }
