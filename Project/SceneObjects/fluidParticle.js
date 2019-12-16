@@ -18,11 +18,13 @@ export default class FluidParticle {
         var MAX_VELOCITY = 1000;
 
         // Update method used to animate the object based on basic physics
-        this.updateMotion = function (delta_t) {
+        this.updateMotion = function (delta_t, gridCell, x, y, z) {
             // Find new position
-            var s = new THREE.Vector3();
-            s.addVectors(this.pos, this.integrate(this.v.x, this.v.y, this.v.z, delta_t));
-            this.pos.set(s.x, s.y, s.z);
+            var newPos = new THREE.Vector3();
+            newPos.addVectors(this.pos, this.integrate(this.v.x, this.v.y, this.v.z, delta_t, gridCell, x, y, z));
+            
+            
+            this.pos.set(newPos.x, newPos.y, newPos.z);
         };
 
         // Update method used to change color of the particle
@@ -35,9 +37,15 @@ export default class FluidParticle {
             this.v.set(v.x, v.y, v.z);
         }
 
-        this.integrate = function(x, y, z, delta_t) {
+        this.integrate = function(x, y, z, delta_t, gridCell, gridx, gridy, gridz) {
             var integrated = new THREE.Vector3(x, y, z);
-            integrated.multiplyScalar(delta_t);
+            // Euler Integration
+            //integrated.multiplyScalar(delta_t);
+            // Midpoint (RK2)
+            var midPointPosition = this.pos.clone().add((integrated.multiplyScalar(delta_t * 0.5)));
+            var midPointVelocity = gridCell.getVelocity((midPointPosition.x - gridx), (midPointPosition.y - gridy), (midPointPosition.z - gridz));
+            integrated = midPointVelocity.multiplyScalar(delta_t); 
+            integrated.clamp(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1)); // CFL Condition
             return integrated;
         }
 
