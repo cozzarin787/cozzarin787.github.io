@@ -392,7 +392,7 @@ export default class FluidSimulator {
             }
 
             // For the following steps:
-                // Use trilinear interplation of the velocities of the eight neighboring grid-velocities to the 
+                // Use trilinear interpolation of the velocities of the eight neighboring grid-velocities to the 
                 // particle you are calculating the velocity for
             // Step 8 (PIC)
                 // update the velocity with the new velocity
@@ -490,6 +490,8 @@ export default class FluidSimulator {
             return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
         }
 
+        // Weight calculations
+        // CREDIT: David Li https://github.com/dli/fluid/blob/master/shaders/transfertogrid.frag
         function h (r) {
             if (r >= 0.0 && r <= 1.0) {
                 return 1.0 - r;

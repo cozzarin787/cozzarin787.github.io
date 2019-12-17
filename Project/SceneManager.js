@@ -22,7 +22,7 @@ export default class SceneManager {
         var fluidSim = new FluidSimulator();
         var helper1 = new THREE.Box3Helper( new THREE.Box3(new THREE.Vector3(-fluidSim.simWidth/2 +1, -fluidSim.simHeight/2 +1, -fluidSim.simDepth/2 +1), new THREE.Vector3(fluidSim.simWidth/2 -1, fluidSim.simHeight/2 -1, fluidSim.simDepth/2 -1)), 0x000000 );
         scene.add( helper1 );
-        fluidSim.initializeSimulation(scene);
+        fluidSim.initializeSimulation(scene, renderer.getContext());
 
         // Setup dat.gui
         var gui = new dat.GUI();
@@ -94,7 +94,7 @@ export default class SceneManager {
             const elapsedTime = clock.getElapsedTime();
             const timeChange = elapsedTime - oldTime;
             oldTime = elapsedTime;
-            fluidSim.simulateParticles(timeChange);
+            fluidSim.simulateParticles(timeChange, renderer.getContext());
             controls.update();
             renderer.render(scene, camera);
         };
