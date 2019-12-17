@@ -15,11 +15,11 @@ export default class FluidSimulator {
         this.fluidWidth = 4;
         this.fluidHeight = 4;
         this.fluidDepth = 4;
-        this.particlesPerGridCell = 8;
-        this.flipness = 0.5;
+        this.particlesPerGridCell = 12;
+        this.flipness = 0.69;
         this.particleSize = 0.5;
         this.emitColor = 0x0000ff;
-        this.fadeColor = 0xffffff;//0xc2ff;
+        this.fadeColor = 0xc2ff;
         this.particleGrid = [];
         this.particleGridPrevVel = [];
         this.particleArray = [];
@@ -418,20 +418,20 @@ export default class FluidSimulator {
                                 
                                 // PIC
                                 var left = this.particleGrid[i-1][j][k].velocity.x;
-                                var right = this.particleGrid[i+1][j][k].velocity.x;
-                                var up = this.particleGrid[i][j+1][k].velocity.y;
+                                var right = this.particleGrid[i][j][k].velocity.x;
+                                var up = this.particleGrid[i][j][k].velocity.y;
                                 var down = this.particleGrid[i][j-1][k].velocity.y;
                                 var front = this.particleGrid[i][j][k-1].velocity.z;
-                                var back = this.particleGrid[i][j][k+1].velocity.z;
+                                var back = this.particleGrid[i][j][k].velocity.z;
                                 var currentVelocity = gridCell.getParticleVelocity(left, right, up, down, front, back, x_d, y_d, z_d);
                                 var picVelocity = currentVelocity;
                                 // FLIP
                                 left = this.particleGridPrevVel[i-1][j][k].velocity.x;
-                                right = this.particleGridPrevVel[i+1][j][k].velocity.x;
-                                up = this.particleGridPrevVel[i][j+1][k].velocity.y;
+                                right = this.particleGridPrevVel[i][j][k].velocity.x;
+                                up = this.particleGridPrevVel[i][j][k].velocity.y;
                                 down = this.particleGridPrevVel[i][j-1][k].velocity.y;
                                 front = this.particleGridPrevVel[i][j][k-1].velocity.z;
-                                back = this.particleGridPrevVel[i][j][k+1].velocity.z;
+                                back = this.particleGridPrevVel[i][j][k].velocity.z;
                                 var originalVelocity = this.particleGridPrevVel[i][j][k].getParticleVelocity(left, right, up, down, front, back, x_d, y_d, z_d);
                                 var flipVelocity = p.v.clone().add(currentVelocity.clone().sub(originalVelocity));
                                 // PIC/FLIP
@@ -454,7 +454,6 @@ export default class FluidSimulator {
                         var x = i - (this.simWidth / 2);
                         var y = j - (this.simHeight / 2);
                         var z = k - (this.simDepth / 2);
-                        
                         for (var l = 0; l < this.particleGrid[i][j][k].particleIndices.length; l++) {
                             var gridCell = this.particleGrid[i][j][k];
                             var pI = gridCell.particleIndices[l];
