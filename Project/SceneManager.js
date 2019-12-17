@@ -1,3 +1,8 @@
+/**
+ * File: SceneManager.js
+ * Author: Jacob Cozzarin
+ */
+
 import * as THREE from "./three/build/three.module.js";
 import * as dat from "./three/examples/jsm/libs/dat.gui.module.js"
 import FluidSimulator from "./SceneObjects/fluidSimulator.js";

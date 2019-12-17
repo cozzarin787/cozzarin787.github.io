@@ -1,3 +1,8 @@
+/**
+ * File: main.js
+ * Author: Jacob Cozzarin
+ */
+
 import { WEBGL } from './three/examples/jsm/WebGL.js'
 import SceneManager from "./SceneManager.js";
 

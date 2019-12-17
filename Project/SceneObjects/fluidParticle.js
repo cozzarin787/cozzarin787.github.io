@@ -1,3 +1,8 @@
+/**
+ * File: fluidParticle.js
+ * Author: Jacob Cozzarin
+ */
+
 import * as THREE from "../three/build/three.module.js";
 
 export default class FluidParticle {

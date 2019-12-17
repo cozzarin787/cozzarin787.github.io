@@ -1,3 +1,8 @@
+/**
+ * File: fluidSimulator.js
+ * Author: Jacob Cozzarin
+ */
+
 import * as THREE from "../three/build/three.module.js";
 import Particle from "./fluidParticle.js"
 import StaggerGridCell from "./staggerGrid.js"
