@@ -25,18 +25,18 @@ export default class SceneManager {
         fluidSim.initializeSimulation(scene, renderer.getContext());
 
         // Setup dat.gui
-        var gui = new dat.GUI();
-        gui.add(fluidSim, "simWidth", 2, 100, 2);
-        gui.add(fluidSim, "simHeight", 2, 100, 2);
-        gui.add(fluidSim, "simDepth", 2, 100, 2);
-        gui.add(fluidSim, "fluidWidth", 2, 100, 2);
-        gui.add(fluidSim, "fluidHeight", 2, 100, 2);
-        gui.add(fluidSim, "fluidDepth", 2, 100, 2);
-        gui.add(fluidSim, "particlesPerGridCell", 1, 20, 1);
-        gui.add(fluidSim, "particleSize", 0.1, 5);
-        gui.add(fluidSim, "flipness", 0, 1);
-        gui.addColor(fluidSim, "emitColor");
-        gui.addColor(fluidSim, "fadeColor");
+        // var gui = new dat.GUI();
+        // gui.add(fluidSim, "simWidth", 2, 100, 2);
+        // gui.add(fluidSim, "simHeight", 2, 100, 2);
+        // gui.add(fluidSim, "simDepth", 2, 100, 2);
+        // gui.add(fluidSim, "fluidWidth", 2, 100, 2);
+        // gui.add(fluidSim, "fluidHeight", 2, 100, 2);
+        // gui.add(fluidSim, "fluidDepth", 2, 100, 2);
+        // gui.add(fluidSim, "particlesPerGridCell", 1, 20, 1);
+        // gui.add(fluidSim, "particleSize", 0.1, 5);
+        // gui.add(fluidSim, "flipness", 0, 1);
+        // gui.addColor(fluidSim, "emitColor");
+        // gui.addColor(fluidSim, "fadeColor");
 
         function buildScene() {
             const scene = new THREE.Scene();
