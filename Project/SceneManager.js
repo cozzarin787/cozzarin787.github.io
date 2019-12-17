@@ -16,7 +16,7 @@ export default class SceneManager {
         const camera = buildCamera(screenDimensions);
         const controls = new OrbitControls( camera, renderer.domElement );
         controls.enableKeys = true;
-        camera.position.set(0, 0, -70);
+        camera.position.set(0, 0, -20);
         camera.lookAt(0,0,0);
         var oldTime = 0;
         var fluidSim = new FluidSimulator();
@@ -25,7 +25,7 @@ export default class SceneManager {
         fluidSim.initializeSimulation(scene, renderer.getContext());
 
         // Setup dat.gui
-        // var gui = new dat.GUI();
+        var gui = new dat.GUI();
         // gui.add(fluidSim, "simWidth", 2, 100, 2);
         // gui.add(fluidSim, "simHeight", 2, 100, 2);
         // gui.add(fluidSim, "simDepth", 2, 100, 2);
@@ -34,7 +34,7 @@ export default class SceneManager {
         // gui.add(fluidSim, "fluidDepth", 2, 100, 2);
         // gui.add(fluidSim, "particlesPerGridCell", 1, 20, 1);
         // gui.add(fluidSim, "particleSize", 0.1, 5);
-        // gui.add(fluidSim, "flipness", 0, 1);
+        gui.add(fluidSim, "flipness", 0, 1);
         // gui.addColor(fluidSim, "emitColor");
         // gui.addColor(fluidSim, "fadeColor");
 
