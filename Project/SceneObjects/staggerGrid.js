@@ -4,19 +4,10 @@ import Particle from "./fluidParticle.js"
 export default class StaggerGridCell {
     constructor(type) {
         this.type = type;
-        this.velocity_up = 0.0;
-        this.velocity_down = 0.0;
-        this.velocity_left = 0.0;
-        this.velocity_right = 0.0;
-        this.velocity_front = 0.0;
-        this.velocity_back = 0.0;
+        this.velocity = new THREE.Vector3(0,0,0);
         this.divergenceCenter = 0.0;
         this.pressure = 0.0;
         this.particleIndices = [];
-
-        this.initParticles = function(newParticles) {
-            this.particleIndices = newParticles;
-        }
 
         this.isAir = function() {
             return this.type == 0;
@@ -28,16 +19,24 @@ export default class StaggerGridCell {
             return this.type == 2;
         }
 
-        this.getVelocity = function(x_d, y_d, z_d) {
+        this.addParticle = function(pI) {
+            this.particleIndices.push(pI);
+        }
+
+        this.removeParticle = function(i) {
+            this.particleIndices.splice(i, 1);
+        }
+
+        this.getParticleVelocity = function(left, right, up, down, front, back, x_d, y_d, z_d) {
             // Get velocity vectors on each vertex of the cube
-            var c_000 = new THREE.Vector3(this.velocity_left, this.velocity_down, this.velocity_front);
-            var c_100 = new THREE.Vector3(this.velocity_right, this.velocity_down, this.velocity_front);
-            var c_010 = new THREE.Vector3(this.velocity_left, this.velocity_up, this.velocity_front);
-            var c_110 = new THREE.Vector3(this.velocity_right, this.velocity_up, this.velocity_front);
-            var c_001 = new THREE.Vector3(this.velocity_left, this.velocity_down, this.velocity_back);
-            var c_101 = new THREE.Vector3(this.velocity_right, this.velocity_down, this.velocity_back);
-            var c_011 = new THREE.Vector3(this.velocity_left, this.velocity_up, this.velocity_back);
-            var c_111 = new THREE.Vector3(this.velocity_right, this.velocity_up, this.velocity_back);
+            var c_000 = new THREE.Vector3(left, down, front);
+            var c_100 = new THREE.Vector3(right, down, front);
+            var c_010 = new THREE.Vector3(left, up, front);
+            var c_110 = new THREE.Vector3(right, up, front);
+            var c_001 = new THREE.Vector3(left, down, back);
+            var c_101 = new THREE.Vector3(right, down, back);
+            var c_011 = new THREE.Vector3(left, up, back);
+            var c_111 = new THREE.Vector3(right, up, back);
 
             // interpolate along x
             var c_00 = c_000.multiplyScalar(1-x_d).add(c_100.multiplyScalar(x_d));

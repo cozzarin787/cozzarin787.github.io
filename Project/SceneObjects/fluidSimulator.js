@@ -8,18 +8,18 @@ export default class FluidSimulator {
         const FLUID = 1;
         const SOLID = 2;
 
-        this.simWidth = 15;
-        this.simHeight = 15;
-        this.simDepth = 15;
+        this.simWidth = 10;
+        this.simHeight = 10;
+        this.simDepth = 10;
         this.fluidOffset = new THREE.Vector3(0,0,0);
         this.fluidWidth = 4;
         this.fluidHeight = 4;
         this.fluidDepth = 4;
         this.particlesPerGridCell = 8;
-        this.flipness = 0;
+        this.flipness = 0.5;
         this.particleSize = 0.5;
         this.emitColor = 0x0000ff;
-        this.fadeColor = 0xc2ff;
+        this.fadeColor = 0xffffff;//0xc2ff;
         this.particleGrid = [];
         this.particleGridPrevVel = [];
         this.particleArray = [];
@@ -101,22 +101,6 @@ export default class FluidSimulator {
         this.simulateParticles = function(delta_t) {
             // STEP 2
             // Transfer particles to appropriate grid cells that contain them
-            // for (var i = 0; i < this.simWidth; i++) {
-            //     for (var j = 0; j < this.simHeight; j++) {
-            //         for (var k = 0; k < this.simDepth; k++) {
-            //             this.particleGrid[i][j][k].particleIndices = [];
-            //         }
-            //     }
-            // }
-            // for (var i = 0; i < this.particleArray.length; i++) {
-            //     var xi = Math.floor(this.particleArray[i].pos.x) + ((this.simWidth / 2));
-            //     var yi = Math.floor(this.particleArray[i].pos.y) + ((this.simHeight / 2));
-            //     var zi = Math.floor(this.particleArray[i].pos.z) + ((this.simDepth / 2));
-            //     xi = THREE.Math.clamp(xi, 0, this.simWidth-1);
-            //     yi = THREE.Math.clamp(yi, 0, this.simHeight-1);
-            //     zi = THREE.Math.clamp(zi, 0, this.simDepth-1);
-            //     this.particleGrid[xi][yi][zi].particleIndices.push(i);
-            // }
             for (var i = 1; i < this.simWidth-1; i++) {
                 for (var j = 1; j < this.simHeight-1; j++) {
                     for (var k = 1; k < this.simDepth-1; k++) {
@@ -130,72 +114,46 @@ export default class FluidSimulator {
                                 var y = j - (this.simHeight / 2);
                                 var z = k - (this.simDepth / 2);
                                 var parPos = particle.pos;
-                                var xi = i;
-                                var yi = j;
-                                var zi = k;
                                 // Check if particle moved out of this grid cell into another
-                                
-                                // X POS
-                                // left
-                                while (parPos.x < x && xi > 0) {
-                                    xi -= 1;
-                                    x -= 1;
+                                var xi = Math.floor(parPos.x) + (this.simWidth / 2);
+                                var yi = Math.floor(parPos.y) + (this.simHeight / 2);
+                                var zi = Math.floor(parPos.z) + (this.simDepth / 2);
+                                if (xi <= 0) {
+                                    xi = 1;
+                                    parPos.setX(-(this.simWidth / 2) + 1);
                                 }
-                                // right
-                                while (parPos.x > x+1 && xi < this.simWidth-1) {
-                                    xi += 1;
-                                    x += 1;
+                                if (xi >= this.simWidth-1) {
+                                    xi = this.simWidth-2;
+                                    parPos.setX((this.simWidth / 2) - 1);
                                 }
-                                // Y POS
-                                // bottom
-                                while (parPos.y < y && yi > 0) {
-                                    yi -= 1;
-                                    y -= 1;
+                                if (yi <= 0) {
+                                    yi = 1;
+                                    parPos.setY(-(this.simHeight / 2) + 1);
                                 }
-                                // top
-                                while (parPos.y > y+1 && yi < this.simHeight-1) {
-                                    yi += 1;
-                                    y += 1;
+                                if (yi >= this.simHeight-1) {
+                                    yi = this.simHeight-2;
+                                    parPos.setY((this.simHeight / 2) - 1);
                                 }
-                                // Z POS
-                                // front
-                                while (parPos.z < z && zi > 0) {
-                                    zi -= 1;
-                                    z -= 1;
+                                if (zi <= 0) {
+                                    zi = 1;
+                                    parPos.setZ(-(this.simDepth / 2) + 1);
                                 }
-                                // back
-                                while (parPos.z > z+1 && zi < this.simDepth-1) {
-                                    zi += 1;
-                                    z += 1;
+                                if (zi >= this.simDepth-1) {
+                                    zi = this.simDepth-2;
+                                    parPos.setZ((this.simDepth / 2) - 1);
                                 }
-                                // Check if new cell isn't a solid or the particle hasn't moved out of the current cell
 
-                                if (this.particleGrid[xi][yi][zi].isSolid()) {
-                                    // if particle moved into solid, push it back out
-                                    if (xi > i)
-                                        parPos.set(x-(1+randn_bm()/16), parPos.y, parPos.z);
-                                    else if (xi < i)
-                                        parPos.set(x+(1+randn_bm()/16), parPos.y, parPos.z);
-                                    if (yi > j)
-                                        parPos.set(parPos.x, y-(1+randn_bm()/16), parPos.z);
-                                    else if (yi < j)
-                                        parPos.set(parPos.x, y+(1+randn_bm()/16), parPos.z);
-                                    if (zi > k)
-                                        parPos.set(parPos.x, parPos.y, z-(1+randn_bm()/16));
-                                    else if (zi < k)
-                                        parPos.set(parPos.x, parPos.y, z+(1+randn_bm()/16));
-                                }
-                                else if (xi != i && yi != j && zi != k) {
+                                if (xi != i || yi != j || zi != k) {
                                     // particle moved, so add it to the appropriate new cell
-                                    this.particleGrid[xi][yi][zi].particleIndices.push(gridParticles[l]);
+                                    this.particleGrid[xi][yi][zi].addParticle(gridParticles[l]);
                                     indicesToRemove.push(l);
                                 }
                                 particle.gridUpdated = true;
                             }
                         }
                         // Remove particles that have moved out of the current cell
-                        for (var ri = indicesToRemove.length-1; ri > 0; ri--) {
-                            this.particleGrid[i][j][k].particleIndices.splice(indicesToRemove[ri], 1);
+                        for (var ri = indicesToRemove.length-1; ri >= 0; ri--) {
+                            this.particleGrid[i][j][k].removeParticle(indicesToRemove[ri]);
                         }
                     }
                 }
@@ -215,12 +173,15 @@ export default class FluidSimulator {
                         var xPosition = new THREE.Vector3(x, y + 0.5, z + 0.5);
                         var yPosition = new THREE.Vector3(x + 0.5, y, z + 0.5);
                         var zPosition = new THREE.Vector3(x + 0.5, y + 0.5, z);
+                        var scalarPosition = new THREE.Vector3(x + 0.5, y + 0.5, z + 0.5);
                         var velocity_x = 0;
                         var velocity_y = 0;
                         var velocity_z = 0;
+                        //var velocity_scalar = 0;
                         var weight_x = 0;
                         var weight_y = 0;
                         var weight_z = 0;
+                        //var weight_scalar = 0;
                         // Get neighboring particles
                         var particles = [];
                         for (var xi = 0; xi < 2; xi++) {
@@ -237,13 +198,16 @@ export default class FluidSimulator {
                             var w_x = calcVelWeight(p.pos.clone().sub(xPosition));
                             var w_y = calcVelWeight(p.pos.clone().sub(yPosition));
                             var w_z = calcVelWeight(p.pos.clone().sub(zPosition));
+                            //var w_scal = calcVelWeight(p.pos.clone().sub(scalarPosition));
 
                             velocity_x += p.v.x * w_x;
                             velocity_y += p.v.y * w_y;
                             velocity_z += p.v.z * w_z;
+                            //velocity_scalar += p.v
                             weight_x += w_x;
                             weight_y += w_y;
                             weight_z += w_z;
+                            //weight_scalar += w_scal;
                         });
 
                         // normalize based on accumulated weights
@@ -255,12 +219,7 @@ export default class FluidSimulator {
                             velocity_z /= weight_z;
 
                         // Assigned interpolated/weighted average velocity components to staggered grid
-                        this.particleGrid[i][j][k].velocity_right = velocity_x;
-                        this.particleGrid[i+1][j][k].velocity_left = velocity_x;
-                        this.particleGrid[i][j][k].velocity_up = velocity_y;
-                        this.particleGrid[i][j+1][k].velocity_down = velocity_y;
-                        this.particleGrid[i][j][k].velocity_back = velocity_z;
-                        this.particleGrid[i][j][k+1].velocity_front = velocity_z;
+                        this.particleGrid[i][j][k].velocity.set(velocity_x, velocity_y, velocity_z);
                     }
                 }
             }
@@ -292,12 +251,7 @@ export default class FluidSimulator {
                     this.particleGridPrevVel[i][j] = [];
                     for (var k = 0; k < this.simDepth; k++) {
                         this.particleGridPrevVel[i][j][k] = new StaggerGridCell(FLUID);
-                        this.particleGridPrevVel[i][j][k].velocity_right;
-                        this.particleGridPrevVel[i][j][k].velocity_left;
-                        this.particleGridPrevVel[i][j][k].velocity_up;
-                        this.particleGridPrevVel[i][j][k].velocity_down;
-                        this.particleGridPrevVel[i][j][k].velocity_back;
-                        this.particleGridPrevVel[i][j][k].velocity_front;
+                        this.particleGridPrevVel[i][j][k].velocity.set(this.particleGrid[i][j][k].velocity.x, this.particleGrid[i][j][k].velocity.y, this.particleGrid[i][j][k].velocity.z);
                     }
                 }
             }
@@ -310,8 +264,7 @@ export default class FluidSimulator {
                 for (var j = 1; j < this.simHeight-1; j++) {
                     for (var k = 1; k < this.simDepth-1; k++) {
                         // Just need to worry about gravity, so change only the y velocities
-                        this.particleGrid[i][j][k].velocity_up += this.gravity * delta_t;
-                        this.particleGrid[i][j+1][k].velocity_down += this.gravity * delta_t;
+                        this.particleGrid[i][j][k].velocity.setY(this.particleGrid[i][j][k].velocity.y + this.gravity * delta_t);
                     }
                 }
             }
@@ -328,39 +281,25 @@ export default class FluidSimulator {
                     for (var k = 0; k < this.simDepth; k++) {
                         // Check if velocity component is adjacent to solid (boundary), set velocity to 0 
                         // X VELOCITY
-                        if (i == 1) { // left velocity adjacent to solid
-                            this.particleGrid[i][j][k].velocity_left = 0;
-                            this.particleGrid[i-1][j][k].velocity_right = 0;
+                        if (i <= 1 ) { // left velocity adjacent to solid
+                            this.particleGrid[i][j][k].velocity.setX(0);
                         }
-                        if (i == this.simWidth-2) {// right velocity adjacent to solid
-                            this.particleGrid[i][j][k].velocity_right = 0;
-                            this.particleGrid[i+1][j][k].velocity_left = 0;
+                        if (i >= this.simWidth-2) {// right velocity adjacent to solid
+                            this.particleGrid[i][j][k].velocity.setX(0);
                         }
                         // Y VELOCITY
-                        if (j == 1) {// up velocity adjacent to solid
-                            this.particleGrid[i][j][k].velocity_down = 0;
-                            this.particleGrid[i][j-1][k].velocity_up = 0;
+                        if (j <= 1) {// up velocity adjacent to solid
+                            this.particleGrid[i][j][k].velocity.setY(0);
                         }
-                        if (j == this.simHeight-2) {// down velocity adjacent to solid
-                            this.particleGrid[i][j][k].velocity_up = 0;
-                            this.particleGrid[i][j+1][k].velocity_down = 0;
+                        if (j >= this.simHeight-2) {// down velocity adjacent to solid
+                            this.particleGrid[i][j][k].velocity.setY(Math.min(this.particleGrid[i][j][k].velocity.y, 0.0));
                         }
                         // Z VELOCITY
-                        if (k == 1) {// front velocity adjacent to solid
-                            this.particleGrid[i][j][k].velocity_front = 0;
-                            this.particleGrid[i][j][k-1].velocity_back = 0;
+                        if (k <= 1) {// front velocity adjacent to solid
+                            this.particleGrid[i][j][k].velocity.setZ(0);
                         }
-                        if (k == this.simHeight-2) {// down velocity adjacent to solid
-                            this.particleGrid[i][j][k].velocity_back = 0;
-                            this.particleGrid[i][j][k+1].velocity_front = 0;
-                        }
-                        if (i == 0 || j == 0 || k == 0 || i == this.simWidth-1 || j == this.simHeight-1 || k == this.simDepth-1) {
-                            this.particleGrid[i][j][k].velocity_right = 0;
-                            this.particleGrid[i][j][k].velocity_left = 0;
-                            this.particleGrid[i][j][k].velocity_up = 0;
-                            this.particleGrid[i][j][k].velocity_down = 0;
-                            this.particleGrid[i][j][k].velocity_back = 0;
-                            this.particleGrid[i][j][k].velocity_front = 0;
+                        if (k >= this.simHeight-2) {// down velocity adjacent to solid
+                            this.particleGrid[i][j][k].velocity.setZ(0);
                         }
                     }
                 }
@@ -398,9 +337,9 @@ export default class FluidSimulator {
                         var cell = this.particleGrid[i][j][k];
                         if (cell.isFluid()) {
                             cell.divergenceCenter = 
-                            ((cell.velocity_right - cell.velocity_left) +
-                            (cell.velocity_up - cell.velocity_down) +
-                            (cell.velocity_back - cell.velocity_front)) / 1.0;
+                            ((this.particleGrid[i+1][j][k].velocity.x - this.particleGrid[i-1][j][k].velocity.x) +
+                            (this.particleGrid[i][j+1][k].velocity.y - this.particleGrid[i][j-1][k].velocity.y) +
+                            (this.particleGrid[i][j][k+1].velocity.z - this.particleGrid[i][j][k-1].velocity.z)) / 1.0;
 
                             cell.divergenceCenter -= Math.max((cell.particleIndices.length - this.particlesPerGridCell) * 1.0, 0.0); // volume conservation
                         }
@@ -412,7 +351,7 @@ export default class FluidSimulator {
             }
 
             // Perform Jacobi iteration to solve for each cell's pressure
-            var PRESSURE_JACOBI_ITERATIONS = 12;
+            var PRESSURE_JACOBI_ITERATIONS = 10;
             for (var i = 0; i < PRESSURE_JACOBI_ITERATIONS; ++i) {
                 for (var i = 1; i < this.simWidth-1; i++) {
                     for (var j = 1; j < this.simHeight-1; j++) {
@@ -436,7 +375,7 @@ export default class FluidSimulator {
                 }
             }
 
-            // Converse mass by subtracting the pressure gradient from the velocity of the cell
+            // // Converse mass by subtracting the pressure gradient from the velocity of the cell
             for (var i = 1; i < this.simWidth-1; i++) {
                 for (var j = 1; j < this.simHeight-1; j++) {
                     for (var k = 1; k < this.simDepth-1; k++) {
@@ -445,12 +384,8 @@ export default class FluidSimulator {
                             var gradientX = this.particleGrid[i+1][j][k].pressure - this.particleGrid[i-1][j][k].pressure;
                             var gradientY = this.particleGrid[i][j+1][k].pressure - this.particleGrid[i][j-1][k].pressure;
                             var gradientZ = this.particleGrid[i][j][k+1].pressure - this.particleGrid[i][j][k-1].pressure;
-                            cell.velocity_left -= gradientX;
-                            cell.velocity_right -= gradientX;
-                            cell.velocity_up -= gradientY;
-                            cell.velocity_down -= gradientY;
-                            cell.velocity_back -= gradientZ;
-                            cell.velocity_front -= gradientZ;
+                            var gradient = new THREE.Vector3(gradientX, gradientY, gradientZ);
+                            cell.velocity.sub(gradient);
                         }
                     }
                 }
@@ -482,9 +417,23 @@ export default class FluidSimulator {
                                 var z_d = (p.pos.z - z);
                                 
                                 // PIC
-                                var picVelocity = gridCell.getVelocity(x_d, y_d, z_d);
+                                var left = this.particleGrid[i-1][j][k].velocity.x;
+                                var right = this.particleGrid[i+1][j][k].velocity.x;
+                                var up = this.particleGrid[i][j+1][k].velocity.y;
+                                var down = this.particleGrid[i][j-1][k].velocity.y;
+                                var front = this.particleGrid[i][j][k-1].velocity.z;
+                                var back = this.particleGrid[i][j][k+1].velocity.z;
+                                var currentVelocity = gridCell.getParticleVelocity(left, right, up, down, front, back, x_d, y_d, z_d);
+                                var picVelocity = currentVelocity;
                                 // FLIP
-                                var flipVelocity = picVelocity.clone().add(picVelocity.clone().sub(this.particleGridPrevVel[i][j][k].getVelocity(x_d, y_d, z_d)));
+                                left = this.particleGridPrevVel[i-1][j][k].velocity.x;
+                                right = this.particleGridPrevVel[i+1][j][k].velocity.x;
+                                up = this.particleGridPrevVel[i][j+1][k].velocity.y;
+                                down = this.particleGridPrevVel[i][j-1][k].velocity.y;
+                                front = this.particleGridPrevVel[i][j][k-1].velocity.z;
+                                back = this.particleGridPrevVel[i][j][k+1].velocity.z;
+                                var originalVelocity = this.particleGridPrevVel[i][j][k].getParticleVelocity(left, right, up, down, front, back, x_d, y_d, z_d);
+                                var flipVelocity = p.v.clone().add(currentVelocity.clone().sub(originalVelocity));
                                 // PIC/FLIP
                                 p.v.lerpVectors(picVelocity, flipVelocity, this.flipness);
                             }
@@ -511,7 +460,13 @@ export default class FluidSimulator {
                             var pI = gridCell.particleIndices[l];
                             var p = this.particleArray[gridCell.particleIndices[l]];
                             
-                            p.updateMotion(delta_t, gridCell, x, y, z);
+                            var left = this.particleGrid[i-1][j][k].velocity.x;
+                            var right = this.particleGrid[i+1][j][k].velocity.x;
+                            var up = this.particleGrid[i][j+1][k].velocity.y;
+                            var down = this.particleGrid[i][j-1][k].velocity.y;
+                            var front = this.particleGrid[i][j][k-1].velocity.z;
+                            var back = this.particleGrid[i][j][k+1].velocity.z;
+                            p.updateMotion(delta_t, gridCell, left, right, up, down, front, back, x, y, z);
                             this.particleGeometry.vertices[pI] = p.pos.clone();
                             p.updateRendering();
                             this.particleGeometry.colors[pI] = p.color.clone();
