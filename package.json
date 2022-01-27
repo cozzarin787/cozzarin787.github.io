@@ -29,7 +29,7 @@
     "fs-extra": "^8.1.0",
     "request": "^2.88.0",
     "start": "^5.1.0",
-    "three": "^0.108.0",
+    "three": "^0.137.0",
     "threejs-full-es6": "^5.1.0"
   },
   "keywords": []
